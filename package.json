@@ -9,7 +9,8 @@
     "start": "node dist/server.js",
     "lint": "eslint src/**/*.ts",
     "typecheck": "tsc --noEmit",
-    "format": "prettier src/**/*.ts --write"
+    "format": "prettier src/**/*.ts --write",
+    "prepare": "husky install"
   },
   "keywords": [],
   "author": "",

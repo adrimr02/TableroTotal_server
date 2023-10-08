@@ -17,6 +17,10 @@ En el directorio clonado, instalar dependencias con
 ```bash
 pnpm install
 ```
+Preparar el espacio de trabajo con
+```bash
+pnpm prepare
+```
 
 ## Uso
 ### Desarrollo
