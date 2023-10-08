@@ -25,7 +25,8 @@ jobs:
         name: Install pnpm and dependencies
         with:
           version: 8
-
+      - name: Install dependencies
+        run: pnpm install
       - run: pnpm typecheck
       - run: pnpm lint
   docker-push-restapi:
