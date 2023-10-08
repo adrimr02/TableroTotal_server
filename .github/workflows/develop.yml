@@ -1,0 +1,29 @@
+name: TableroTotal server CI
+
+on:
+  pull_request:
+    branches:
+      - develop
+  push:
+    branches:
+      - develop
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm and dependencies
+        with:
+          version: 8
+
+      - run: pnpm typecheck
+      - run: pnpm lint
+      
