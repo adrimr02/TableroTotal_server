@@ -32,11 +32,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": [
-        "pnpm format",
-        "pnpm typecheck",
-        "pnpm lint"
-      ]
+      "pre-commit": "pnpm format pnpm typecheck pnpm lint"
     }
   }
 }
