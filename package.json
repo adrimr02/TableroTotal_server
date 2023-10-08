@@ -32,7 +32,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "pnpm format pnpm typecheck pnpm lint"
+      "pre-commit": "echo \"[Husky]\" pre-commit && pnpm format && pnpm typecheck && pnpm lint"
     }
   }
 }
