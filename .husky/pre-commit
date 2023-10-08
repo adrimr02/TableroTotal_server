@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "[Husky] Pre-commit:"
+pnpm format
+pnpm typecheck
+pnpm lint

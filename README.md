@@ -41,3 +41,6 @@ pnpm start
 - `pnpm typecheck`: Comprueba que no hay errores de tipado
 - `pnpm lint`: Busca posibles errores en el código
 - `pnpm format`: Formatea el código
+
+
+&& pnpm format && pnpm typecheck && pnpm lint
