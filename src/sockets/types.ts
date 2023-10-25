@@ -37,7 +37,7 @@ export type GameSocket = Socket<ClientToServerEvents, ServerToClientEvents, Reco
 
 export type GameOptions = {
   game: Game
-  players: number
+  maxPlayers: number
   rounds: number
   timeout?: number
 }

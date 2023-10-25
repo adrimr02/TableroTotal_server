@@ -26,12 +26,7 @@ export function initSocketServer(httpServer: HttpServer) {
       callback({
         status: 'ok',
         roomCode,
-        gameOptions: {
-          game: 'rock_paper_scissors',
-          players: 2,
-          rounds: 3,
-          timeout: 10,
-        },
+        gameOptions: options,
       })
     })
     socket.on('join', (code, username, callback) => {
@@ -45,7 +40,7 @@ export function initSocketServer(httpServer: HttpServer) {
         status: 'ok',
         gameOptions: {
           game: 'rock_paper_scissors',
-          players: 2,
+          maxPlayers: 2,
           rounds: 3,
           timeout: 10,
         },
