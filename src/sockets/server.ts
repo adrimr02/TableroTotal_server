@@ -1,3 +1,4 @@
+import { RoomManager } from './roomManager'
 import { Server } from 'socket.io'
 import type { HttpServer } from '../server'
 import type { ClientToServerEvents, ServerToClientEvents, SocketData } from './types'
@@ -5,9 +6,10 @@ import { genRoomCode } from '../util'
 
 export function initSocketServer(httpServer: HttpServer) {
   const io = new Server<ClientToServerEvents, ServerToClientEvents, Record<string, never>, SocketData>(httpServer)
-
   const gameIo = io.of('/play')
   // const friendsIo = io.of('/friends')
+
+  const roomManager = new RoomManager(gameIo)
 
   gameIo.on('connection', (socket) => {
     console.log('a user connected')
@@ -20,8 +22,17 @@ export function initSocketServer(httpServer: HttpServer) {
         roomCode = genRoomCode()
       }
 
-      // Create room
-      // Save room data
+      const room = roomManager.createRoom(roomCode, options)
+
+      if (!room) {
+        return callback({
+          status: 'error',
+          errorMessage: 'cannot_create_room',
+        })
+      }
+
+      room.init()
+      room.join(socket)
 
       callback({
         status: 'ok',
@@ -33,8 +44,16 @@ export function initSocketServer(httpServer: HttpServer) {
       console.log('join', code, username)
       socket.data.username = username
 
-      // Check if room exists
-      // Get room data
+      const room = roomManager.getRoom(code)
+
+      if (!room) {
+        return callback({
+          status: 'error',
+          errorMessage: 'room_not_found',
+        })
+      }
+
+      room.join(socket)
 
       callback({
         status: 'ok',

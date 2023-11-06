@@ -1,27 +1,29 @@
 import type { Namespace, Socket } from 'socket.io'
-export interface ServerToClientEvents {}
+export interface ServerToClientEvents {
+  // General events
+
+  // Room events
+  show_time: (params: { counter: number }) => void
+}
 
 export interface ClientToServerEvents {
+  // General events
   create: (
     username: string,
     gameOptions: GameOptions,
-    callback: ({
-      status,
-      roomCode,
-      gameOptions,
-    }:
-      | { status: 'ok'; roomCode: string; gameOptions: GameOptions }
-      | { status: 'error'; roomCode: never; gameOptions: never }) => void,
+    callback: (
+      params: { status: 'ok'; roomCode: string; gameOptions: GameOptions } | { status: 'error'; errorMessage: string },
+    ) => void,
   ) => void
 
   join: (
     username: string,
     code: string,
-    callback: ({
-      status,
-      gameOptions,
-    }: { status: 'ok'; gameOptions: GameOptions } | { status: 'error'; gameOptions: never }) => void,
+    callback: (params: { status: 'ok'; gameOptions: GameOptions } | { status: 'error'; errorMessage: string }) => void,
   ) => void
+
+  // Room events
+  mark_as_ready: (callback: (newState: ReadyState) => void) => void
 }
 
 export interface SocketData {
@@ -41,3 +43,5 @@ export type GameOptions = {
   rounds: number
   timeout?: number
 }
+
+export type ReadyState = 'ready' | 'not_ready'
