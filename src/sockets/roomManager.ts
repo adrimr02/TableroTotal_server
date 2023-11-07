@@ -1,4 +1,4 @@
-import { type Game } from '../Games/game'
+import { type Game, TicTacToe } from '../Games/Game'
 import type { GameNamespace, GameSocket, GameOptions, ReadyState } from './types'
 
 export class RoomManager {
@@ -45,7 +45,10 @@ class Room {
         this.game = null
         break
       case 'tic_tac_toe':
-        this.game = null
+        this.game = new TicTacToe({
+          finishGame: this.finishGame,
+          showCountdown: this.showCountdown
+        })
         break
       default:
         throw new Error('Invalid game')
@@ -87,6 +90,10 @@ class Room {
         username: p.data.username, readyState: this.waitingState[p.id] 
       }))
     })
+  }
+
+  private finishGame(results: string) {
+    results
   }
 
   private showCountdown(timeout: number, callback: () => void, isDone?: (counter: number) => boolean) {
