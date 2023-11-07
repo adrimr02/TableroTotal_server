@@ -70,11 +70,22 @@ class Room {
     this.players.push(newPlayer)
     newPlayer.join(this.roomCode)
     this.waitingState[newPlayer.id] = 'not_ready'
+    this.showPlayers()
     newPlayer.on('disconnect', () => {
       this.players = this.players.filter((player) => player.id !== newPlayer.id)
       if (this.players.length === 0) {
         this.io.adapter.rooms.delete(this.roomCode)
+      } else {
+        this.showPlayers()
       }
+    })
+  }
+
+  private showPlayers() {
+    this.io.to(this.roomCode).emit("show_players_waiting", { 
+      players: this.players.map(p => ({ 
+        username: p.data.username, readyState: this.waitingState[p.id] 
+      }))
     })
   }
 
@@ -100,7 +111,7 @@ class Room {
     player.on('mark_as_ready', (callback) => {
       if (this.waitingState[player.id] === 'ready') this.waitingState[player.id] = 'not_ready'
       else if (this.waitingState[player.id] === 'not_ready') this.waitingState[player.id] = 'ready'
-
+      this.showPlayers()
       callback(this.waitingState[player.id])
     })
   }

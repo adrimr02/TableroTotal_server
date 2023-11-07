@@ -4,6 +4,8 @@ export interface ServerToClientEvents {
 
   // Room events
   show_time: (params: { counter: number }) => void
+
+  show_players_waiting: (params : { players: PlayerList }) => void
 }
 
 export interface ClientToServerEvents {
@@ -33,6 +35,11 @@ export interface SocketData {
 const games = ['rock_paper_scissors', 'tic_tac_toe', 'even_odd'] as const
 
 type Game = (typeof games)[number]
+
+type PlayerList = {
+  username: string,
+  readyState: ReadyState
+}[]
 
 export type GameNamespace = Namespace<ClientToServerEvents, ServerToClientEvents, Record<string, never>, SocketData>
 export type GameSocket = Socket<ClientToServerEvents, ServerToClientEvents, Record<string, never>, SocketData>
