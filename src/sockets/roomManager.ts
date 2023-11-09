@@ -48,7 +48,7 @@ class Room {
         this.game = new TicTacToe({
           finishGame: this.finishGame,
           showCountdown: this.showCountdown
-        })
+        }, this.players.map(p => ({ id: p.id, username: p.data.username })))
         break
       default:
         throw new Error('Invalid game')
