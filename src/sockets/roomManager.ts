@@ -47,7 +47,8 @@ class Room {
       case 'tic_tac_toe':
         this.game = new TicTacToe({
           finishGame: this.finishGame,
-          showCountdown: this.showCountdown
+          showCountdown: this.showCountdown,
+          nextTurn: this.nextTurn,
         }, this.players.map(p => ({ id: p.id, username: p.data.username })))
         break
       default:
@@ -92,8 +93,14 @@ class Room {
     })
   }
 
+  private showResults(results: string) {
+    this.io.to(this.roomCode).emit("show_turn_results", { 
+      results
+    })
+  }
+
   private finishGame(results: string) {
-    results
+    this.showResults(results)
   }
 
   private showCountdown(timeout: number, callback: () => void, isDone?: (counter: number) => boolean) {
@@ -111,7 +118,12 @@ class Room {
 
   private startGame() {
     // start game logic
-    this.game //...
+    this.game?.startGameLoop()
+  }
+
+  private nextTurn(players: string[]) {
+    console.log(players)
+    this.showResults("")
   }
 
   private initMarkAsReadyListener(player: GameSocket) {

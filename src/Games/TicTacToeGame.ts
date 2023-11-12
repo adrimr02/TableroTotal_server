@@ -3,14 +3,18 @@ import type { Game, GameState } from "./Game"
 type ControlFuntions = {
   showCountdown: (timeout: number, callback: () => void, isDone?: (counter: number) => boolean) => NodeJS.Timeout
   finishGame: (results: string) => void
+  nextTurn: (players: string[]) => void
 }
 
 export class TicTacToe implements Game {
 
   private gameState: GameState<TTTState, PlayerState> = {
+    config: {
+      timeout: 10
+    },
     state: {
       round: 0,
-      turn: '',
+      nextTurn: '',
       board: [
         null, null, null,
         null, null, null,
@@ -21,10 +25,12 @@ export class TicTacToe implements Game {
   }
   private showCountdown: ControlFuntions['showCountdown']
   private finishGame: ControlFuntions['finishGame']
+  private nextTurn: ControlFuntions['nextTurn']
 
   constructor(controlFn: ControlFuntions, players: PlayerInfo[]) {
     this.finishGame = controlFn.finishGame
     this.showCountdown = controlFn.showCountdown
+    this.nextTurn = controlFn.nextTurn
     this.gameState.players[players[0].id] = {
       symbol: 'circle',
       username: players[0].username
@@ -36,11 +42,18 @@ export class TicTacToe implements Game {
   }
 
   startGameLoop(): void {
-    while (!this.isGameOver()) {
-      this.gameState
-      this.showCountdown
-      this.finishGame
+    if (this.isGameOver()) {
+      this.finishGame("to-do")
+      return
     }
+    const turn = this.gameState.state.nextTurn
+    this.nextTurn([turn])
+    this.showCountdown(this.gameState.config.timeout, () => {
+      
+      this.startGameLoop()
+    }, () => {
+      return turn !== this.gameState.state.nextTurn
+    })
   }
 
   playerLeave(playerId: string): void {
@@ -60,7 +73,7 @@ export class TicTacToe implements Game {
 }
 
 type TTTState = {
-  turn: string,
+  nextTurn: string,
   round: number,
   board: {
     0: null|string, 1: null|string, 2: null|string,

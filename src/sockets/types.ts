@@ -6,6 +6,8 @@ export interface ServerToClientEvents {
   show_time: (params: { counter: number }) => void
 
   show_players_waiting: (params : { players: PlayerList }) => void
+
+  show_turn_results: (params : unknown) => void
 }
 
 export interface ClientToServerEvents {

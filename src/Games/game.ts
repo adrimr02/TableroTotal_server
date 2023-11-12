@@ -10,6 +10,9 @@ interface Game {
 }
 
 type GameState<TGameState, TPlayerState> = {
+  config: {
+    timeout: number,
+  },
   state: TGameState,
   players: Record<string, TPlayerState>
 }
