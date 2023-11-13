@@ -1,13 +1,15 @@
 import type { Namespace, Socket } from 'socket.io'
 export interface ServerToClientEvents {
   // General events
-
+  
   // Room events
   show_time: (params: { counter: number }) => void
 
   show_players_waiting: (params : { players: PlayerList }) => void
 
   show_turn_results: (params : unknown) => void
+
+  next_turn: (params: { players: string[] }) => void
 }
 
 export interface ClientToServerEvents {

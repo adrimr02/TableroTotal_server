@@ -28,9 +28,9 @@ export const Rooms: Record<string, Room> = {}
 class Room {
   private io: GameNamespace
   private players: GameSocket[] = []
-  private gameOptions: GameOptions
+  public gameOptions: GameOptions
   private roomCode: string
-  private game: Game | null // TODO eliminar null al tener todos los juegos
+  private game: Game // TODO eliminar null al tener todos los juegos
   private waitingState: Record<string, ReadyState> = {}
 
   constructor(io: GameNamespace, roomCode: string, gameOptions: GameOptions) {
@@ -38,18 +38,20 @@ class Room {
     this.roomCode = roomCode
     this.gameOptions = gameOptions
     switch (this.gameOptions.game) {
-      case 'rock_paper_scissors':
-        this.game = null
-        break
-      case 'even_odd':
-        this.game = null
-        break
+      // case 'rock_paper_scissors':
+      //   this.game = null
+      //   break
+      // case 'even_odd':
+      //   this.game = null
+      //   break
       case 'tic_tac_toe':
         this.game = new TicTacToe({
           finishGame: this.finishGame,
           showCountdown: this.showCountdown,
           nextTurn: this.nextTurn,
+          showResults: this.showResults,
         }, this.players.map(p => ({ id: p.id, username: p.data.username })))
+        this.gameOptions.maxPlayers = TicTacToe.MaxPlayers
         break
       default:
         throw new Error('Invalid game')
@@ -70,19 +72,24 @@ class Room {
     }
   }
 
-  public join(newPlayer: GameSocket) {
+  public join(newPlayer: GameSocket): boolean {
+    if (this.players.length == this.gameOptions.maxPlayers) {
+      return false
+    }
     this.players.push(newPlayer)
     newPlayer.join(this.roomCode)
     this.waitingState[newPlayer.id] = 'not_ready'
     this.showPlayers()
     newPlayer.on('disconnect', () => {
       this.players = this.players.filter((player) => player.id !== newPlayer.id)
+      this.game.playerLeave(newPlayer.id)
       if (this.players.length === 0) {
         this.io.adapter.rooms.delete(this.roomCode)
       } else {
         this.showPlayers()
       }
     })
+    return true
   }
 
   private showPlayers() {
@@ -93,14 +100,13 @@ class Room {
     })
   }
 
-  private showResults(results: string) {
-    this.io.to(this.roomCode).emit("show_turn_results", { 
-      results
+  private initMarkAsReadyListener(player: GameSocket) {
+    player.on('mark_as_ready', (callback) => {
+      if (this.waitingState[player.id] === 'ready') this.waitingState[player.id] = 'not_ready'
+      else if (this.waitingState[player.id] === 'not_ready') this.waitingState[player.id] = 'ready'
+      this.showPlayers()
+      callback(this.waitingState[player.id])
     })
-  }
-
-  private finishGame(results: string) {
-    this.showResults(results)
   }
 
   private showCountdown(timeout: number, callback: () => void, isDone?: (counter: number) => boolean) {
@@ -118,20 +124,19 @@ class Room {
 
   private startGame() {
     // start game logic
-    this.game?.startGameLoop()
+    this.game.startGameLoop()
   }
 
   private nextTurn(players: string[]) {
-    console.log(players)
-    this.showResults("")
+    // Anounces the players that will have the turn on the next round
+    this.io.to(this.roomCode).emit('next_turn', { players })
   }
 
-  private initMarkAsReadyListener(player: GameSocket) {
-    player.on('mark_as_ready', (callback) => {
-      if (this.waitingState[player.id] === 'ready') this.waitingState[player.id] = 'not_ready'
-      else if (this.waitingState[player.id] === 'not_ready') this.waitingState[player.id] = 'ready'
-      this.showPlayers()
-      callback(this.waitingState[player.id])
-    })
+  private showResults(results: unknown) {
+    this.io.to(this.roomCode).emit("show_turn_results", results)
+  }
+
+  private finishGame(results: string) {
+    this.showResults(results)
   }
 }

@@ -32,12 +32,17 @@ export function initSocketServer(httpServer: HttpServer) {
       }
 
       room.init()
-      room.join(socket)
+      if (!room.join(socket)) {
+        return callback({
+          status: 'error',
+          errorMessage: 'cannot_join_room',
+        })
+      }
 
       callback({
         status: 'ok',
         roomCode,
-        gameOptions: options,
+        gameOptions: room.gameOptions,
       })
     })
     socket.on('join', (code, username, callback) => {
@@ -53,16 +58,16 @@ export function initSocketServer(httpServer: HttpServer) {
         })
       }
 
-      room.join(socket)
+      if (!room.join(socket)) {
+        return callback({
+          status: 'error',
+          errorMessage: 'cannot_join_room',
+        })
+      }
 
       callback({
         status: 'ok',
-        gameOptions: {
-          game: 'rock_paper_scissors',
-          maxPlayers: 2,
-          rounds: 3,
-          timeout: 10,
-        },
+        gameOptions: room.gameOptions,
       })
     })
     socket.on('disconnect', () => {

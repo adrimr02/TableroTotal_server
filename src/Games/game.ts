@@ -5,8 +5,7 @@ interface Game {
   playerLeave(playerId: string): void
 
   // TODO Decidir tipos de la accion movimiento
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  move(playerId: string, action: any): void
+  move(playerId: string, action: unknown): void
 }
 
 type GameState<TGameState, TPlayerState> = {
