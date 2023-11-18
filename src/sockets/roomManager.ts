@@ -123,7 +123,11 @@ class Room {
   }
 
   private startGame() {
-    // start game logic
+    if (this.players.length < 2) {
+      this.io.to(this.roomCode).emit("error", { code: "not_enough_players" })
+      return
+    }
+    this.io.to(this.roomCode).emit("start_game")
     this.game.startGameLoop()
   }
 

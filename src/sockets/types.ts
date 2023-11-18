@@ -1,7 +1,7 @@
 import type { Namespace, Socket } from 'socket.io'
 export interface ServerToClientEvents {
   // General events
-  
+  error: (params: { msg?: string, code: string }) => void
   // Room events
   show_time: (params: { counter: number }) => void
 
@@ -10,6 +10,8 @@ export interface ServerToClientEvents {
   show_turn_results: (params : unknown) => void
 
   next_turn: (params: { players: string[] }) => void
+
+  start_game: () => void
 }
 
 export interface ClientToServerEvents {
