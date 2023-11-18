@@ -3,7 +3,7 @@ import type { Game, GameState } from "./Game"
 
 type ControlFuntions = {
   showCountdown: (timeout: number, callback: () => void, isDone?: (counter: number) => boolean) => NodeJS.Timeout
-  finishGame: (results: string) => void
+  finishGame: (results: unknown) => void
   nextTurn: (players: string[]) => void
   showResults: (results: unknown) => void
 }
@@ -27,7 +27,7 @@ export class TicTacToe implements Game {
         null, null, null
       ],
       isGameOver: false,
-      result: {},
+      results: {},
     },
     players: {},
   }
@@ -57,7 +57,7 @@ export class TicTacToe implements Game {
   startGameLoop(): void {
     this.isGameOver()
     if (this.game.state.isGameOver) {
-      this.finishGame("to-do")
+      this.finishGame(this.game.state.results) // TODO
       return
     }
     const turn = this.game.state.nextTurn
@@ -67,7 +67,7 @@ export class TicTacToe implements Game {
       this.game.state.moveAllowed = false
       if (turn === this.game.state.nextTurn) { // The player missed their turn -> Lose game
         this.game.state.isGameOver = true
-        this.game.state.result = {
+        this.game.state.results = {
           type: 'timeout',
           winner: this.getOtherPlayer(turn)
         }
@@ -90,7 +90,7 @@ export class TicTacToe implements Game {
 
   playerLeave(playerId: string): void {
     this.game.state.isGameOver = true
-    this.game.state.result = {
+    this.game.state.results = {
       type: 'resignation',
       winner: this.getOtherPlayer(playerId)
     }
@@ -127,7 +127,7 @@ export class TicTacToe implements Game {
       const [a, b, c] = combination
       if (this.game.state.board[a] !== null && this.game.state.board[a] === this.game.state.board[b] && this.game.state.board[a] === this.game.state.board[c]) {
         this.game.state.isGameOver = true
-        this.game.state.result = {
+        this.game.state.results = {
           type: 'winner',
           winner: this.game.state.board[a]!
         }
@@ -139,7 +139,7 @@ export class TicTacToe implements Game {
     if (!this.game.state.board.includes(null)) {
       this.game.state.isGameOver = true
       if (this.game.state.isGameOver) // Needed for TS to detect gameover properties
-        this.game.state.result = {
+        this.game.state.results = {
           type: 'draw',
           winner: Object.keys(this.game.players)
         }
@@ -159,10 +159,10 @@ type TTTState = {
   moveAllowed: boolean,
 } & ({
   isGameOver: false
-  result: Record<string, never>
+  results: Record<string, never>
 } | {
   isGameOver: true
-  result: GameResults
+  results: GameResults
 })
 
 type GameResults = {

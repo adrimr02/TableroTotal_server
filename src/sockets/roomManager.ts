@@ -68,7 +68,7 @@ class Room {
     })
     // Initializing player ready listener
     for (const player of this.players) {
-      this.initMarkAsReadyListener(player)
+      this.initListeners(player)
     }
   }
 
@@ -100,12 +100,16 @@ class Room {
     })
   }
 
-  private initMarkAsReadyListener(player: GameSocket) {
+  private initListeners(player: GameSocket) {
     player.on('mark_as_ready', (callback) => {
       if (this.waitingState[player.id] === 'ready') this.waitingState[player.id] = 'not_ready'
       else if (this.waitingState[player.id] === 'not_ready') this.waitingState[player.id] = 'ready'
       this.showPlayers()
       callback(this.waitingState[player.id])
+    })
+
+    player.on('move', (action) => {
+      this.game.move(player.id, action)
     })
   }
 
@@ -140,7 +144,7 @@ class Room {
     this.io.to(this.roomCode).emit("show_turn_results", results)
   }
 
-  private finishGame(results: string) {
-    this.showResults(results)
+  private finishGame(results: unknown) {
+    this.io.to(this.roomCode).emit("finish_game", results)
   }
 }

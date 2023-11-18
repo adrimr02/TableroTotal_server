@@ -2,16 +2,20 @@ import type { Namespace, Socket } from 'socket.io'
 export interface ServerToClientEvents {
   // General events
   error: (params: { msg?: string, code: string }) => void
+  
   // Room events
   show_time: (params: { counter: number }) => void
 
   show_players_waiting: (params : { players: PlayerList }) => void
 
-  show_turn_results: (params : unknown) => void
-
-  next_turn: (params: { players: string[] }) => void
-
   start_game: () => void
+  
+  // Game events
+  next_turn: (params: { players: string[] }) => void
+  
+  show_turn_results: (results : unknown) => void
+
+  finish_game: (results: unknown) => void
 }
 
 export interface ClientToServerEvents {
@@ -32,6 +36,9 @@ export interface ClientToServerEvents {
 
   // Room events
   mark_as_ready: (callback: (newState: ReadyState) => void) => void
+
+  // Game events
+  move: (action: unknown) => void
 }
 
 export interface SocketData {
