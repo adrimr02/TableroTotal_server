@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { Game, GameState } from "./Game"
+import type { Game, GameState, PlayerInfo } from "./Game"
 
 type ControlFuntions = {
   showCountdown: (timeout: number, callback: () => void, isDone?: (counter: number) => boolean) => NodeJS.Timeout
@@ -15,7 +15,8 @@ export class TicTacToe implements Game {
 
   private game: GameState<TTTState, PlayerState> = {
     config: {
-      timeout: 10
+      timeout: 10,
+      maxPlayers: 2
     },
     state: {
       round: 0,
@@ -37,24 +38,17 @@ export class TicTacToe implements Game {
   private nextTurn: ControlFuntions['nextTurn']
   private showResults: ControlFuntions['showResults']
 
-  constructor(controlFn: ControlFuntions, players: PlayerInfo[]) {
+  constructor(controlFn: ControlFuntions) {
     this.finishGame = controlFn.finishGame
     this.showCountdown = controlFn.showCountdown
     this.nextTurn = controlFn.nextTurn
     this.showResults = controlFn.showResults
-
-    this.game.players[players[0].id] = {
-      symbol: 'circle',
-      username: players[0].username
-    }
-    this.game.players[players[1].id] = {
-      symbol: 'cross',
-      username: players[1].username
-    }
-    this.game.state.nextTurn = players[0].id
   }
 
   startGameLoop(): void {
+    if (this.game.state.nextTurn.length === 0)
+      this.game.state.nextTurn = Object.keys(this.game.players)[Math.floor(Math.random() * Object.keys(this.game.players).length)] // First turn is random
+
     this.isGameOver()
     if (this.game.state.isGameOver) {
       this.finishGame(this.game.state.results) // TODO
@@ -94,6 +88,13 @@ export class TicTacToe implements Game {
       type: 'resignation',
       winner: this.getOtherPlayer(playerId)
     }
+  }
+
+  addPlayer(playerInfo: PlayerInfo): boolean {
+    if (Object.keys(this.game.players).length === this.game.config.maxPlayers)
+      return false
+    this.game.players[playerInfo.id] = { ...playerInfo, symbol: Object.keys(this.game.players).length === 0 ? 'circle' : 'cross' }
+    return true
   }
 
   move(playerId: string, action: unknown): void {
@@ -187,8 +188,3 @@ type PlayerState = {
 }
 
 type BoardSymbol = 'circle' | 'cross'
-
-type PlayerInfo = {
-  id: string
-  username: string
-}

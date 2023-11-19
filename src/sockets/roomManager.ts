@@ -51,7 +51,7 @@ class Room {
           showCountdown: this.showCountdown,
           nextTurn: this.nextTurn,
           showResults: this.showResults,
-        }, this.players.map(p => ({ id: p.id, username: p.data.username })))
+        })
         this.gameOptions.maxPlayers = TicTacToe.MaxPlayers
         break
       default:
@@ -78,6 +78,10 @@ class Room {
     this.waitingState[newPlayer.id] = 'not_ready'
     this.initListeners(newPlayer)
     this.showPlayers()
+    
+    if (!this.game.addPlayer({ id: newPlayer.id, username: newPlayer.data.username }))
+      return false
+
     newPlayer.on('disconnect', () => {
       this.players = this.players.filter((player) => player.id !== newPlayer.id)
       this.game.playerLeave(newPlayer.id)
