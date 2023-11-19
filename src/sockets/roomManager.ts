@@ -18,6 +18,7 @@ export class RoomManager {
       const room = new Room(this.io, roomCode, gameOptions)
       return room
     } catch (e: unknown) {
+      console.error(e)
       return null
     }
   }
@@ -38,12 +39,12 @@ class Room {
     this.roomCode = roomCode
     this.gameOptions = gameOptions
     switch (this.gameOptions.game) {
-      // case 'rock_paper_scissors':
-      //   this.game = null
-      //   break
-      // case 'even_odd':
-      //   this.game = null
-      //   break
+      case 'rock_paper_scissors':
+        throw new Error(`Game ${this.gameOptions.game} not yet implemented`)
+
+      case 'even_odd':
+        throw new Error(`Game ${this.gameOptions.game} not yet implemented`)
+
       case 'tic_tac_toe':
         this.game = new TicTacToe({
           finishGame: this.finishGame,
