@@ -66,10 +66,6 @@ class Room {
       }
       return true
     })
-    // Initializing player ready listener
-    for (const player of this.players) {
-      this.initListeners(player)
-    }
   }
 
   public join(newPlayer: GameSocket): boolean {
@@ -79,6 +75,7 @@ class Room {
     this.players.push(newPlayer)
     newPlayer.join(this.roomCode)
     this.waitingState[newPlayer.id] = 'not_ready'
+    this.initListeners(newPlayer)
     this.showPlayers()
     newPlayer.on('disconnect', () => {
       this.players = this.players.filter((player) => player.id !== newPlayer.id)
