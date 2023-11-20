@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import type { Game, GameState, PlayerInfo } from "./Game"
+import type { Game, GameState } from "./Game"
+import type { PlayerInfo } from '../sockets/types'
 
 type ControlFuntions = {
   showCountdown: (timeout: number, callback: () => void, isDone?: (counter: number) => boolean) => NodeJS.Timeout

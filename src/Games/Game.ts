@@ -1,3 +1,4 @@
+import type { PlayerInfo } from "../sockets/types"
 import { TicTacToe } from "./TicTacToeGame"
 
 interface Game {
@@ -16,14 +17,8 @@ type GameState<TGameState, TPlayerState> = {
   players: Record<string, TPlayerState>
 }
 
-type PlayerInfo = {
-  id: string
-  username: string
-}
-
 export {
   Game,
   GameState,
-  TicTacToe,
-  PlayerInfo
+  TicTacToe
 }

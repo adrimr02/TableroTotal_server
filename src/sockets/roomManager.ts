@@ -1,5 +1,5 @@
 import { type Game, TicTacToe } from '../Games/Game'
-import type { GameNamespace, GameSocket, GameOptions, ReadyState } from './types'
+import type { GameNamespace, GameSocket, GameOptions, ReadyState, PlayerInfo } from './types'
 
 export class RoomManager {
   private io: GameNamespace
@@ -139,7 +139,8 @@ class Room {
 
   private nextTurn(players: string[]) {
     // Anounces the players that will have the turn on the next round
-    this.io.to(this.roomCode).emit('next_turn', { players })
+    const playersInfo: PlayerInfo[] = this.players.filter(s => players.some(p => s.id === p)).map(p => ({ id: p.id, username: p.data.username }))
+    this.io.to(this.roomCode).emit('next_turn', { players: playersInfo })
   }
 
   private showResults(results: unknown) {
