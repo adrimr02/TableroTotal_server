@@ -11,7 +11,7 @@ export interface ServerToClientEvents {
   start_game: () => void
   
   // Game events
-  next_turn: (params: { players: string[] }) => void
+  next_turn: (params: { players: PlayerInfo[] }) => void
   
   show_turn_results: (results : unknown) => void
 
@@ -53,6 +53,11 @@ type PlayerList = {
   username: string,
   readyState: ReadyState
 }[]
+
+export type PlayerInfo = {
+  id: string
+  username: string
+}
 
 export type GameNamespace = Namespace<ClientToServerEvents, ServerToClientEvents, Record<string, never>, SocketData>
 export type GameSocket = Socket<ClientToServerEvents, ServerToClientEvents, Record<string, never>, SocketData>

@@ -1,5 +1,5 @@
 import { type Game, TicTacToe } from '../Games/Game'
-import type { GameNamespace, GameSocket, GameOptions, ReadyState } from './types'
+import type { GameNamespace, GameSocket, GameOptions, ReadyState, PlayerInfo } from './types'
 
 export class RoomManager {
   private io: GameNamespace
@@ -18,6 +18,7 @@ export class RoomManager {
       const room = new Room(this.io, roomCode, gameOptions)
       return room
     } catch (e: unknown) {
+      console.error(e)
       return null
     }
   }
@@ -38,19 +39,19 @@ class Room {
     this.roomCode = roomCode
     this.gameOptions = gameOptions
     switch (this.gameOptions.game) {
-      // case 'rock_paper_scissors':
-      //   this.game = null
-      //   break
-      // case 'even_odd':
-      //   this.game = null
-      //   break
+      case 'rock_paper_scissors':
+        throw new Error(`Game ${this.gameOptions.game} not yet implemented`)
+
+      case 'even_odd':
+        throw new Error(`Game ${this.gameOptions.game} not yet implemented`)
+
       case 'tic_tac_toe':
         this.game = new TicTacToe({
           finishGame: this.finishGame,
           showCountdown: this.showCountdown,
           nextTurn: this.nextTurn,
           showResults: this.showResults,
-        }, this.players.map(p => ({ id: p.id, username: p.data.username })))
+        })
         this.gameOptions.maxPlayers = TicTacToe.MaxPlayers
         break
       default:
@@ -77,6 +78,10 @@ class Room {
     this.waitingState[newPlayer.id] = 'not_ready'
     this.initListeners(newPlayer)
     this.showPlayers()
+    
+    if (!this.game.addPlayer({ id: newPlayer.id, username: newPlayer.data.username }))
+      return false
+
     newPlayer.on('disconnect', () => {
       this.players = this.players.filter((player) => player.id !== newPlayer.id)
       this.game.playerLeave(newPlayer.id)
@@ -134,7 +139,8 @@ class Room {
 
   private nextTurn(players: string[]) {
     // Anounces the players that will have the turn on the next round
-    this.io.to(this.roomCode).emit('next_turn', { players })
+    const playersInfo: PlayerInfo[] = this.players.filter(s => players.some(p => s.id === p)).map(p => ({ id: p.id, username: p.data.username }))
+    this.io.to(this.roomCode).emit('next_turn', { players: playersInfo })
   }
 
   private showResults(results: unknown) {
