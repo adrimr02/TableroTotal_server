@@ -66,6 +66,7 @@ export class TicTacToe implements Game {
           type: 'timeout',
           winner: this.getOtherPlayer(turn)
         }
+        this.startGameLoop()
       } else {
         this.showResults({ board: this.game.state.board })
         this.startGameLoop()
