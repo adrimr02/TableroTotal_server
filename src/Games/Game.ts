@@ -1,4 +1,5 @@
 import { TicTacToe } from "./TicTacToeGame"
+import {RockPaperScissors} from "./RCS"
 
 interface Game {
   startGameLoop(): void
@@ -20,4 +21,5 @@ export {
   Game,
   GameState,
   TicTacToe,
+  RockPaperScissors
 }
