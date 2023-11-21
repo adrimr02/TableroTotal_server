@@ -38,26 +38,28 @@ export class TicTacToe implements Game {
   private showCountdown: ControlFuntions['showCountdown']
   private finishGame: ControlFuntions['finishGame']
   private nextTurn: ControlFuntions['nextTurn']
-  private showResults: ControlFuntions['showResults']
+  private showTurnResults: ControlFuntions['showResults']
   private showInitialInfo: ControlFuntions['showInitialInfo']
 
   constructor(controlFn: ControlFuntions) {
     this.finishGame = controlFn.finishGame
     this.showCountdown = controlFn.showCountdown
     this.nextTurn = controlFn.nextTurn
-    this.showResults = controlFn.showResults
+    this.showTurnResults = controlFn.showResults
     this.showInitialInfo = controlFn.showInitialInfo
   }
 
   startGameLoop(): void {
     if (this.game.state.nextTurn.length === 0) { // First loop
       this.game.state.nextTurn = Object.keys(this.game.players)[Math.floor(Math.random() * Object.keys(this.game.players).length)] // First turn is random
-      this.showInitialInfo({})
+      this.showInitialInfo({
+        players: Object.values(this.game.players).map((p, i) => ({ ...p, id: Object.keys(this.game.players)[i] }))
+      })
     }
 
     this.isGameOver()
     if (this.game.state.isGameOver) {
-      this.finishGame(this.game.state.results) // TODO
+      this.finishGame(this.game.state.results)
       return
     }
     const turn = this.game.state.nextTurn
@@ -73,7 +75,7 @@ export class TicTacToe implements Game {
         }
         this.startGameLoop()
       } else {
-        this.showResults({ board: this.game.state.board })
+        this.showTurnResults({ board: this.game.state.board })
         this.startGameLoop()
       }
     }, () => {
@@ -100,7 +102,7 @@ export class TicTacToe implements Game {
   addPlayer(playerInfo: PlayerInfo): boolean {
     if (Object.keys(this.game.players).length === this.game.config.maxPlayers)
       return false
-    this.game.players[playerInfo.id] = { ...playerInfo, symbol: Object.keys(this.game.players).length === 0 ? 'circle' : 'cross' }
+    this.game.players[playerInfo.id] = { ...playerInfo, symbol: Object.keys(this.game.players).length === 0 ? 'cross' : 'circle' }
     return true
   }
 
