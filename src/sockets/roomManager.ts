@@ -1,5 +1,6 @@
 import { type Game, TicTacToe } from '../Games/Game'
 import type { GameNamespace, GameSocket, GameOptions, ReadyState, PlayerInfo } from './types'
+import userManager from './userManager'
 
 export class RoomManager {
   private io: GameNamespace
@@ -61,7 +62,8 @@ class Room {
 
   public init() {
     // Start waiting time
-    this.showCountdown(30, this.startGame, () => {
+    console.log('init')
+    this.showCountdown(10, this.startGame.bind(this), () => {
       for (const playerState of Object.values(this.waitingState)) {
         if (playerState === 'not_ready') return false
       }
@@ -70,9 +72,13 @@ class Room {
   }
 
   public join(newPlayer: GameSocket): boolean {
+    console.log('player join', this.players.length)
     if (this.players.length == this.gameOptions.maxPlayers) {
       return false
     }
+
+    userManager.playerJoins(newPlayer.id, this.roomCode)
+
     this.players.push(newPlayer)
     newPlayer.join(this.roomCode)
     this.waitingState[newPlayer.id] = 'not_ready'
@@ -83,6 +89,7 @@ class Room {
       return false
 
     newPlayer.on('disconnect', () => {
+      console.log('player leave', this.players.length)
       this.players = this.players.filter((player) => player.id !== newPlayer.id)
       this.game.playerLeave(newPlayer.id)
       if (this.players.length === 0) {
@@ -120,6 +127,7 @@ class Room {
     const countDownInterval = setInterval(() => {
       this.io.to(this.roomCode).emit('show_time', { counter })
       counter--
+      console.log(counter)
       if (counter === 0 || isDone?.(counter)) {
         clearInterval(countDownInterval)
         callback()
@@ -129,7 +137,9 @@ class Room {
   }
 
   private startGame() {
+    console.log('starting game')
     if (this.players.length < 2) {
+      console.log('not enough players')
       this.io.to(this.roomCode).emit("error", { code: "not_enough_players" })
       return
     }
@@ -148,6 +158,9 @@ class Room {
   }
 
   private finishGame(results: unknown) {
+    for (const player of this.players)
+      userManager.playerLeaves(player.id, this.roomCode)
+
     this.io.to(this.roomCode).emit("finish_game", results)
   }
 }
