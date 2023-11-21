@@ -1,6 +1,6 @@
 import type { PlayerInfo } from "../sockets/types"
 import { TicTacToe } from "./TicTacToeGame"
-import {RockPaperScissors} from "./RCS"
+import {RockPaperScissors} from "./RPS"
 
 interface Game {
   startGameLoop(): void
