@@ -47,7 +47,8 @@ class Room {
           showCountdown: this.showCountdown,
           showResults: this.showResults
         }, gameOptions.rounds)
-
+        break;
+        
       case 'even_odd':
         throw new Error(`Game ${this.gameOptions.game} not yet implemented`)
 
