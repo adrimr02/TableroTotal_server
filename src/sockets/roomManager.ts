@@ -1,4 +1,4 @@
-import { type Game, TicTacToe } from '../Games/Game'
+import { type Game, TicTacToe, RockPaperScissors } from '../Games/Game'
 import type { GameNamespace, GameSocket, GameOptions, ReadyState, PlayerInfo } from './types'
 
 export class RoomManager {
@@ -40,7 +40,11 @@ class Room {
     this.gameOptions = gameOptions
     switch (this.gameOptions.game) {
       case 'rock_paper_scissors':
-        throw new Error(`Game ${this.gameOptions.game} not yet implemented`)
+        this.game = new RockPaperScissors({
+          finishGame: this.finishGame,
+          showCountdown: this.showCountdown,
+          showResults: this.showResults
+        }, gameOptions.rounds)
 
       case 'even_odd':
         throw new Error(`Game ${this.gameOptions.game} not yet implemented`)

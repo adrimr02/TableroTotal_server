@@ -34,6 +34,7 @@ type GameState = {
   config: {
     timeout: number;
     maxPlayers: number;
+    rounds: number;
   };
   state: RPSState;
   players: Record<string, PlayerState>;
@@ -46,6 +47,7 @@ export class RockPaperScissors {
     config: {
       timeout: 10,
       maxPlayers: RockPaperScissors.MaxPlayers,
+      rounds: 0
     },
     state: {
       round: 0,
@@ -61,10 +63,11 @@ export class RockPaperScissors {
   private finishGame: ControlFunctions['finishGame'];
   private showResults: ControlFunctions['showResults'];
 
-  constructor(controlFn: ControlFunctions) {
+  constructor(controlFn: ControlFunctions, rounds: number) {
     this.finishGame = controlFn.finishGame;
     this.showCountdown = controlFn.showCountdown;
     this.showResults = controlFn.showResults;
+    this.game.config.rounds = rounds;
   }
 
   startGameLoop(): void {
@@ -178,12 +181,14 @@ export class RockPaperScissors {
       return moveRound;
     });
   
-    this.game.state.isGameOver = true;
-    this.game.state.results = {
-      type: 'winner',
-      winner: winner !== 'no_player' ? winner : 'draw',
-      moves: moves,
-    };
+    if (this.game.state.round === this.game.config.rounds){
+      this.game.state.isGameOver = true;
+      this.game.state.results = {
+        type: 'winner',
+        winner: winner !== 'no_player' ? winner : 'draw',
+        moves: moves,
+      };
+    }
   }
   
   
