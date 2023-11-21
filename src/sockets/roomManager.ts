@@ -47,6 +47,7 @@ class Room {
           showCountdown: this.showCountdown,
           showResults: this.showResults
         }, gameOptions.rounds)
+        this.gameOptions.maxPlayers = RockPaperScissors.MaxPlayers
         break
 
       case 'even_odd':
@@ -69,7 +70,8 @@ class Room {
 
   public init() {
     // Start waiting time
-    this.showCountdown(120, this.startGame, () => {
+    console.log('init')
+    this.showCountdown(120, this.startGame.bind(this), () => {
       this.showPlayers()
       for (const playerState of Object.values(this.waitingState)) {
         if (playerState === 'not_ready') return false
