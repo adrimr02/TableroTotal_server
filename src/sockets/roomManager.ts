@@ -45,6 +45,7 @@ class Room {
           showCountdown: this.showCountdown,
           showResults: this.showResults
         }, gameOptions.rounds)
+        break
 
       case 'even_odd':
         throw new Error(`Game ${this.gameOptions.game} not yet implemented`)
@@ -65,7 +66,8 @@ class Room {
 
   public init() {
     // Start waiting time
-    this.showCountdown(30, this.startGame, () => {
+    this.showCountdown(120, this.startGame, () => {
+      this.showPlayers()
       for (const playerState of Object.values(this.waitingState)) {
         if (playerState === 'not_ready') return false
       }
