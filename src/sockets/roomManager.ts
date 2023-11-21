@@ -17,6 +17,7 @@ export class RoomManager {
   public createRoom(roomCode: string, gameOptions: GameOptions): Room | null {
     try {
       const room = new Room(this.io, roomCode, gameOptions)
+      this.rooms[roomCode] = room
       return room
     } catch (e: unknown) {
       console.error(e)
@@ -64,11 +65,12 @@ class Room {
   public init() {
     // Start waiting time
     console.log('init')
-    this.showCountdown(10, this.startGame.bind(this), () => {
+    this.showCountdown(120, this.startGame.bind(this), () => {
+      this.showPlayers()
       for (const playerState of Object.values(this.waitingState)) {
         if (playerState === 'not_ready') return false
       }
-      return true
+      return this.players.length >= 2
     })
   }
 
@@ -115,6 +117,7 @@ class Room {
       if (this.waitingState[player.id] === 'ready') this.waitingState[player.id] = 'not_ready'
       else if (this.waitingState[player.id] === 'not_ready') this.waitingState[player.id] = 'ready'
       this.showPlayers()
+      console.log(player.data.username, this.waitingState[player.id])
       callback(this.waitingState[player.id])
     })
 
@@ -145,6 +148,7 @@ class Room {
       return
     }
     this.io.to(this.roomCode).emit("start_game")
+    this.removeRoomListeners()
     this.game.startGameLoop()
   }
 
@@ -167,5 +171,9 @@ class Room {
       userManager.playerLeaves(player.id, this.roomCode)
 
     this.io.to(this.roomCode).emit("finish_game", results)
+  }
+
+  private removeRoomListeners() {
+
   }
 }
