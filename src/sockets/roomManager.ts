@@ -52,6 +52,7 @@ class Room {
           showCountdown: this.showCountdown,
           nextTurn: this.nextTurn,
           showResults: this.showResults,
+          showInitialInfo: this.showInitialInfo
         })
         this.gameOptions.maxPlayers = TicTacToe.MaxPlayers
         break
@@ -145,6 +146,10 @@ class Room {
     }
     this.io.to(this.roomCode).emit("start_game")
     this.game.startGameLoop()
+  }
+
+  private showInitialInfo(info: unknown) {
+    this.io.to(this.roomCode).emit("show_initial_info", info)
   }
 
   private nextTurn(players: string[]) {

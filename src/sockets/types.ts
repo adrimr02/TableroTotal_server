@@ -11,6 +11,8 @@ export interface ServerToClientEvents {
   start_game: () => void
   
   // Game events
+  show_initial_info: (params: unknown) => void
+
   next_turn: (params: { players: PlayerInfo[] }) => void
   
   show_turn_results: (results : unknown) => void

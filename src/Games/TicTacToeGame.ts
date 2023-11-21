@@ -7,6 +7,7 @@ type ControlFuntions = {
   finishGame: (results: unknown) => void
   nextTurn: (players: string[]) => void
   showResults: (results: unknown) => void
+  showInitialInfo: (info: unknown) => void
 }
 
 const moveActionParser = z.object({ cell: z.number().int().min(0).max(8) })
@@ -38,17 +39,21 @@ export class TicTacToe implements Game {
   private finishGame: ControlFuntions['finishGame']
   private nextTurn: ControlFuntions['nextTurn']
   private showResults: ControlFuntions['showResults']
+  private showInitialInfo: ControlFuntions['showInitialInfo']
 
   constructor(controlFn: ControlFuntions) {
     this.finishGame = controlFn.finishGame
     this.showCountdown = controlFn.showCountdown
     this.nextTurn = controlFn.nextTurn
     this.showResults = controlFn.showResults
+    this.showInitialInfo = controlFn.showInitialInfo
   }
 
   startGameLoop(): void {
-    if (this.game.state.nextTurn.length === 0)
+    if (this.game.state.nextTurn.length === 0) { // First loop
       this.game.state.nextTurn = Object.keys(this.game.players)[Math.floor(Math.random() * Object.keys(this.game.players).length)] // First turn is random
+      this.showInitialInfo({})
+    }
 
     this.isGameOver()
     if (this.game.state.isGameOver) {
