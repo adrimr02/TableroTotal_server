@@ -39,6 +39,7 @@ class Room {
   private roomCode: string
   private game: Game // TODO eliminar null al tener todos los juegos
   private waitingState: Record<string, ReadyState> = {}
+  private clientsReady: Record<string, boolean> = {}
   private closeRoom: () => void
 
   constructor(io: GameNamespace, roomCode: string, gameOptions: GameOptions, closeRoom: () => void) {
@@ -98,6 +99,7 @@ class Room {
     this.players.push(newPlayer)
     newPlayer.join(this.roomCode)
     this.waitingState[newPlayer.id] = 'not_ready'
+    this.clientsReady[newPlayer.id] = false
     this.initListeners(newPlayer)
     this.showPlayers()
     
@@ -141,6 +143,10 @@ class Room {
     player.on('move', (action) => {
       this.game.move(player.id, action)
     })
+
+    player.on('client_ready', () => {
+      this.clientsReady[player.id] = true
+    })
   }
 
   private showCountdown(timeout: number, callback: () => void, isDone?: (counter: number) => boolean) {
@@ -166,7 +172,17 @@ class Room {
       return
     }
     this.io.to(this.roomCode).emit("start_game")
-    setTimeout(() => this.game.startGameLoop(), 200)
+
+    const checkClients = () => {
+      console.log("Waiting for clients ready")
+      if (Object.values(this.clientsReady).includes(false)) {
+        setTimeout(() => checkClients(), 200)
+      } else {
+        this.game.startGameLoop()
+      }
+    }
+
+    checkClients()
   }
 
   private showInitialInfo(info: unknown) {

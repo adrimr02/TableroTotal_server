@@ -30,7 +30,9 @@ export class TicTacToe implements Game {
         null, null, null
       ],
       isGameOver: false,
-      results: {},
+      results: {
+
+      },
     },
     players: {},
   }
@@ -50,7 +52,6 @@ export class TicTacToe implements Game {
   }
 
   startGameLoop(): void {
-    console.log("running")
     if (this.game.state.nextTurn.length === 0) { // First loop
       this.game.state.nextTurn = Object.keys(this.game.players)[Math.floor(Math.random() * Object.keys(this.game.players).length)] // First turn is random
       this.showInitialInfo({
@@ -69,6 +70,10 @@ export class TicTacToe implements Game {
     this.game.state.moveAllowed = true
     this.showCountdown(this.game.config.timeout, () => {
       this.game.state.moveAllowed = false
+      if (this.game.state.isGameOver) {
+        this.startGameLoop()
+        return
+      }
       if (turn === this.game.state.nextTurn) { // The player missed their turn -> Lose game
         this.game.state.isGameOver = true
         this.game.state.results = {
@@ -81,7 +86,7 @@ export class TicTacToe implements Game {
         setTimeout(() => this.startGameLoop(), 200)
       }
     }, () => {
-      return turn !== this.game.state.nextTurn // If the player has already moved -> cancel the countdown
+      return turn !== this.game.state.nextTurn || this.game.state.isGameOver // If the player has already moved -> cancel the countdown
     })
   }
 
@@ -94,6 +99,7 @@ export class TicTacToe implements Game {
   }
 
   playerLeave(playerId: string): void {
+    console.log('playerLeave')
     this.game.state.isGameOver = true
     this.game.state.results = {
       type: 'resignation',
@@ -109,11 +115,9 @@ export class TicTacToe implements Game {
   }
 
   move(playerId: string, action: unknown): void {
-    console.log("player tried to move")
     if (playerId !== this.game.state.nextTurn || !this.game.state.moveAllowed)
       return // Not their turn
 
-    console.log("player moved")
     try {
       const { cell } = moveActionParser.parse(action)
       // Zod will verify the number is between 0 and 8
@@ -155,11 +159,10 @@ export class TicTacToe implements Game {
     // Check if the board is full (draw)
     if (!this.game.state.board.includes(null)) {
       this.game.state.isGameOver = true
-      if (this.game.state.isGameOver) // Needed for TS to detect gameover properties
-        this.game.state.results = {
-          type: 'draw',
-          winner: Object.keys(this.game.players)
-        }
+      this.game.state.results = {
+        type: 'draw',
+        winner: Object.keys(this.game.players)
+      }
       return
     }
   
@@ -174,13 +177,9 @@ type TTTState = {
   round: number,
   board: BoardCell[],
   moveAllowed: boolean,
-} & ({
-  isGameOver: false
-  results: Record<string, never>
-} | {
-  isGameOver: true
+  isGameOver: boolean
   results: GameResults
-})
+}
 
 type GameResults = {
   type: 'draw'
@@ -194,7 +193,7 @@ type GameResults = {
 } | {
   type: 'resignation'
   winner: string
-}
+} | Record<string, never>
 
 type BoardCell = null|string
 
