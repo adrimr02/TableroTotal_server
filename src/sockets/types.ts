@@ -39,6 +39,8 @@ export interface ClientToServerEvents {
   // Room events
   mark_as_ready: (callback: (newState: ReadyState) => void) => void
 
+  client_ready: () => void
+
   // Game events
   move: (action: unknown) => void
 }
