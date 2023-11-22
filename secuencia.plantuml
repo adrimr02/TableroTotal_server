@@ -1,0 +1,12 @@
+@startuml Juego TTT
+  state c <<choice>>
+
+  MainLoop -> c 
+
+  c -> GameFinished : termino el juego
+  c -> GameNotFinished : no termino el juego
+  GameNotFinished --> NextTurn
+  NextTurn --> ShowCountdown : se envia a los jugadores si tienen el turno o no
+  ShowCountdown --> ShowResults : durante este tiempo el jugador con el turno hace su movimiento
+  ShowResults -> MainLoop : la casilla que ocupo el jugador
+@enduml
