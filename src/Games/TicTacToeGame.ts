@@ -50,6 +50,7 @@ export class TicTacToe implements Game {
   }
 
   startGameLoop(): void {
+    console.log("running")
     if (this.game.state.nextTurn.length === 0) { // First loop
       this.game.state.nextTurn = Object.keys(this.game.players)[Math.floor(Math.random() * Object.keys(this.game.players).length)] // First turn is random
       this.showInitialInfo({
@@ -58,6 +59,7 @@ export class TicTacToe implements Game {
     }
 
     this.isGameOver()
+
     if (this.game.state.isGameOver) {
       this.finishGame(this.game.state.results)
       return
@@ -76,7 +78,7 @@ export class TicTacToe implements Game {
         this.startGameLoop()
       } else {
         this.showTurnResults({ board: this.game.state.board })
-        this.startGameLoop()
+        setTimeout(() => this.startGameLoop(), 200)
       }
     }, () => {
       return turn !== this.game.state.nextTurn // If the player has already moved -> cancel the countdown
@@ -107,9 +109,11 @@ export class TicTacToe implements Game {
   }
 
   move(playerId: string, action: unknown): void {
+    console.log("player tried to move")
     if (playerId !== this.game.state.nextTurn || !this.game.state.moveAllowed)
       return // Not their turn
 
+    console.log("player moved")
     try {
       const { cell } = moveActionParser.parse(action)
       // Zod will verify the number is between 0 and 8
@@ -123,7 +127,10 @@ export class TicTacToe implements Game {
         if (player !== playerId)
           this.game.state.nextTurn = player
       }
-    } catch (error) {}
+      console.log(this.game.state.board)
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   isGameOver(): void {
