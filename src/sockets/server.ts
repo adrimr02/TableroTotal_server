@@ -24,6 +24,8 @@ export function initSocketServer(httpServer: HttpServer) {
         roomCode = genRoomCode()
       }
 
+      console.log(roomCode)
+
       if (!userManager.playerJoins(socket.id, roomCode)) {
         return // User already in a room
       }
@@ -51,12 +53,10 @@ export function initSocketServer(httpServer: HttpServer) {
         gameOptions: room.gameOptions,
       })
     })
-    socket.on('join', (code, username, callback) => {
+    socket.on('join', (username, code, callback) => {
       console.log('join', code, username)
       socket.data.username = username
-
-      const room = roomManager.getRoom(code)
-
+      const room = roomManager.getRoom(code.toUpperCase())
       if (!room) {
         return callback({
           status: 'error',

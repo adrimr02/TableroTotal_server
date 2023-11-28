@@ -1,5 +1,6 @@
 import type { PlayerInfo } from "../sockets/types"
 import { TicTacToe } from "./TicTacToeGame"
+import {RockPaperScissors} from "./RPS"
 
 interface Game {
   startGameLoop(): void
@@ -20,5 +21,6 @@ type GameState<TGameState, TPlayerState> = {
 export {
   Game,
   GameState,
-  TicTacToe
+  TicTacToe,
+  RockPaperScissors
 }
