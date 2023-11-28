@@ -1,11 +1,11 @@
-import { z } from 'zod'
+import { number, string, z } from 'zod'
 import type { Game, GameState } from "./Game"
 import type { PlayerInfo } from '../sockets/types'
 
 type ControlFuntions = {
   showCountdown: (timeout: number, callback: () => void, isDone?: (counter: number) => boolean) => NodeJS.Timeout
   finishGame: (results: unknown) => void
-  nextTurn: (players: string[]) => void
+  round: (round: number) => void
   showResults: (results: unknown) => void
   showInitialInfo: (info: unknown) => void
 }
@@ -13,93 +13,99 @@ type ControlFuntions = {
 const moveActionParser = z.object({ cell: z.number().int().min(0).max(8) })
 
 export class EvensAndNones implements Game {
-  public static MaxPlayers = 2
+  public static MaxPlayers = 10
+  public static MaxRound = 10
 
+  //Estado inicial de la partida
   private game: GameState<EANState, PlayerState> = {
     config: {
-      timeout: 10,
-      maxPlayers: 2
+      timeout: 30,
+      maxPlayers: 10
     },
     state: {
       round: 0,
-      nextTurn: '',
+      chart: new Map<String, number>(),
       isGameOver: false,
-      type: 'evens',
       number: 0,
-      results: {},
+      winner: {}
     },
     players: {},
   }
 
   private showCountdown: ControlFuntions['showCountdown']
   private finishGame: ControlFuntions['finishGame']
-  private nextTurn: ControlFuntions['nextTurn']
+  private getRound: ControlFuntions['round']
   private showResults: ControlFuntions['showResults']
   private showInitialInfo: ControlFuntions['showInitialInfo']
 
   constructor(controlFn: ControlFuntions) {
     this.finishGame = controlFn.finishGame
     this.showCountdown = controlFn.showCountdown
-    this.nextTurn = controlFn.nextTurn
+    this.getRound = controlFn.round
     this.showResults = controlFn.showResults
     this.showInitialInfo = controlFn.showInitialInfo
   }
 
   startGameLoop(): void {
-    if (this.game.state.nextTurn.length === 0) { // First loop
-      this.game.state.nextTurn = Object.keys(this.game.players)[Math.floor(Math.random() * Object.keys(this.game.players).length)] // First turn is random
+    // Primera ronda
+    if (this.game.state.round == 0) { 
+      //this.game.state.round = Object.keys(this.game.players)[Math.floor(Math.random() * Object.keys(this.game.players).length)] // First turn is random
       this.showInitialInfo({})
     }
 
     this.isGameOver()
+
     if (this.game.state.isGameOver) {
-      this.finishGame(this.game.state.results)
+      this.finishGame(this.game.state.winner)
       return
     }
 
-    const turn = this.game.state.nextTurn
-    this.nextTurn([turn])
-    this.showCountdown(this.game.config.timeout, () => {
-      if (turn === this.game.state.nextTurn) { // The player missed their turn -> Lose game
-        this.game.state.isGameOver = true
-        this.game.state.results = {
-          type: 'timeout',
-          winner: this.getOtherPlayer(turn)
-        }
-      } else {
+    const round = this.game.state.round
+    this.getRound(round)
+    this.showCountdown(this.game.config.timeout,
+
+      () => {
+        //TODO hacer que calcule las puntuaciones una vez terminado el tiempo
         //this.showResults({ board: this.game.state.board })
         this.startGameLoop()
-      }
-    }, () => {
-      return turn !== this.game.state.nextTurn // If the player has already moved -> cancel the countdown
-    })
+      },
+
+      () => {
+        //TODO comprobar si todos han respondido y pasar a la fase de comprobación
+        return false
+      })
   }
 
   getOtherPlayer(player: string) : string {
-    for (const otherPlayer of Object.keys(this.game.players)) {
+    /*for (const otherPlayer of Object.keys(this.game.players)) {
       if (player !== otherPlayer)
         return otherPlayer
     }
-    return 'no_player'
-  }
+    return 'no_player'*/
 
-  playerLeave(playerId: string): void {
-    this.game.state.isGameOver = true
-    this.game.state.results = {
-      type: 'resignation',
-      winner: this.getOtherPlayer(playerId)
-    }
+    return ''
   }
 
   addPlayer(playerInfo: PlayerInfo): boolean {
+    //añadimos jugador si hay menos de 10
     if (Object.keys(this.game.players).length === this.game.config.maxPlayers)
       return false
     this.game.players[playerInfo.id] = { ...playerInfo}
     return true
   }
 
+  playerLeave(playerId: string): void {
+    /*this.game.state.isGameOver = true
+    this.game.state.results = {
+      type: 'resignation',
+      winner: this.getOtherPlayer(playerId)
+    }*/
+  }
+
+  //TODO este método se encargará de actualizar la tabla de puntuaciones
+  //y pasar a la siguiente ronda
   move(playerId: string, action: unknown): void {
-    if (playerId !== this.game.state.nextTurn)
+    /*if (playerId !== this.game.state.round)
       return // Not their turn
 
     try {
@@ -107,53 +113,60 @@ export class EvensAndNones implements Game {
       // Gives turn to next player
       for (const player of Object.keys(this.game.players)) {
         if (player !== playerId)
-          this.game.state.nextTurn = player
+          this.game.state.round = player
       }
-    } catch (error) {}
+    } catch (error) {} */
   }
 
   isGameOver(): void {
+    //Si se han completado todas las rondas
+    if(this.game.state.round > EvensAndNones.MaxRound){
+      this.game.state.isGameOver = true
 
-    //if...
-        this.game.state.isGameOver = true
-        this.game.state.results = {
-          type: 'winner',
-          winner: ''
+        //Dame el jugador con más puntos
+        this.game.state.winner = {
+          winner: this.getWinner()[0],
+          points: this.getWinner()[1]
         }
-        return
-      
+    }      
   } 
+
+  getWinner(): [string, number] {
+    var winner
+    var points = 0
+
+    for (let [clave, valor] of this.game.state.chart) {
+      console.log(`Clave: ${clave}, Valor: ${valor}`);
+      if(valor > points){
+        winner = clave
+        points = valor
+      }
+    }
+
+    return [winner, points]
+  }
+
 }
 
 type EANState = {
-  nextTurn: string,
-  round: number,
-  type: NumberType,
-  number: number,
+  round: number
+  chart: Map<String, number>
+  number: number
 } & ({
   isGameOver: false
-  results: Record<string, never>
+  winner: Record<string, never>
 } | {
   isGameOver: true
-  results: GameResults
+  winner: GameResults
 })
 
 type GameResults = {
-  type: 'draw'
-  winner:  string[]
-} | {
-  type: 'winner'
   winner: string
-} | {
-  type: 'timeout'
-  winner: string
-} | {
-  type: 'resignation'
-  winner: string
+  points: number
 }
 
 type PlayerState = {
-  username: string,
+  username: string
 }
 
 type NumberType = 'evens' | 'nones'
