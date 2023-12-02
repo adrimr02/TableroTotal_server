@@ -10,11 +10,12 @@ type ControlFuntions = {
   showInitialInfo: (info: unknown) => void
 }
 
-const moveActionParser = z.object({ cell: z.number().int().min(0).max(8) })
+const moveActionParser = z.object({ numberType: z.union([z.literal('evens'), z.literal('nones')]), number: z.number().int() })
 
 export class EvensAndNones implements Game {
   public static MaxPlayers = 10
   public static MaxRound = 10
+  public static PointsPerWin = 3
 
   //Estado inicial de la partida
   private game: GameState<EANState, PlayerState> = {
@@ -23,10 +24,10 @@ export class EvensAndNones implements Game {
       maxPlayers: 10
     },
     state: {
-      round: 0,
+      round: 1,
       chart: new Map<String, number>(),
+      infoRound: new Map(),
       isGameOver: false,
-      number: 0,
       winner: {}
     },
     players: {},
@@ -47,85 +48,99 @@ export class EvensAndNones implements Game {
   }
 
   startGameLoop(): void {
-    // Primera ronda
-    if (this.game.state.round == 0) { 
-      //this.game.state.round = Object.keys(this.game.players)[Math.floor(Math.random() * Object.keys(this.game.players).length)] // First turn is random
-      this.showInitialInfo({})
-    }
-
-    this.isGameOver()
-
-    if (this.game.state.isGameOver) {
-      this.finishGame(this.game.state.winner)
-      return
-    }
-
     const round = this.game.state.round
-    this.getRound(round)
+
+    this.game.state.infoRound.clear()
+
+    // Primera ronda
+    if (this.game.state.round == 1) { 
+      this.showInitialInfo({round})
+    }
+
     this.showCountdown(this.game.config.timeout,
 
       () => {
-        //TODO hacer que calcule las puntuaciones una vez terminado el tiempo
-        //this.showResults({ board: this.game.state.board })
+        this.calculatePoints()
+
+        this.showResults({
+          round: round+1,
+          chart: Object.entries(this.game.state.chart).map(x => {
+            return {
+              points: x[1],
+              playerId:  x[0],
+              username: this.game.players[x[0]].username
+            }
+          }).sort((x, y) => {
+            return x.points - y.points
+          })
+        })
+
+        this.isGameOver()
+
+        if (this.game.state.isGameOver) {
+          this.finishGame(this.game.state.winner)
+          return
+        }
+
+        this.game.state.round++
+
         this.startGameLoop()
       },
 
       () => {
-        //TODO comprobar si todos han respondido y pasar a la fase de comprobación
-        return false
-      })
+        return Object.keys (this.game.state.infoRound).length == Object.keys(this.game.players).length
+      })    
   }
 
-  getOtherPlayer(player: string) : string {
-    /*for (const otherPlayer of Object.keys(this.game.players)) {
-      if (player !== otherPlayer)
-        return otherPlayer
-    }
-    return 'no_player'*/
+  calculatePoints(){
+    var sum = 0;
 
-    return ''
+    for(var values of Object.values(this.game.state.infoRound)){
+      sum += values.number
+    }
+
+    for(var entries of Object.entries(this.game.state.infoRound)){
+      if(sum%2 == 0){
+        if(entries[1].numberType == 'evens'){
+          this.game.state.chart[entries[0]] += EvensAndNones.PointsPerWin;
+        }        
+      } else {
+        if(entries[1].numberType == 'nones'){
+          this.game.state.chart[entries[0]] += EvensAndNones.PointsPerWin;
+        }
+      }
+    }
+
   }
 
   addPlayer(playerInfo: PlayerInfo): boolean {
     //añadimos jugador si hay menos de 10
     if (Object.keys(this.game.players).length === this.game.config.maxPlayers)
       return false
+
     this.game.players[playerInfo.id] = { ...playerInfo}
+
+    this.game.state.chart[playerInfo.id] = 0
+
     return true
   }
 
-  playerLeave(playerId: string): void {
-    /*this.game.state.isGameOver = true
-    this.game.state.results = {
-      type: 'resignation',
-      winner: this.getOtherPlayer(playerId)
-    }*/
+  playerLeave(_playerId: string): void {
   }
 
-  //TODO este método se encargará de actualizar la tabla de puntuaciones
-  //y pasar a la siguiente ronda
   move(playerId: string, action: unknown): void {
-    /*if (playerId !== this.game.state.round)
-      return // Not their turn
-
-    try {
-
-      // Gives turn to next player
-      for (const player of Object.keys(this.game.players)) {
-        if (player !== playerId)
-          this.game.state.round = player
-      }
-    } catch (error) {} */
+    var obj = moveActionParser.parse(action)
+    this.game.state.infoRound.set(playerId, {number: obj.number, typeNumber: obj.numberType})
   }
 
   isGameOver(): void {
     //Si se han completado todas las rondas
-    if(this.game.state.round > EvensAndNones.MaxRound){
+    if(this.game.state.round == EvensAndNones.MaxRound){
       this.game.state.isGameOver = true
 
         //Dame el jugador con más puntos
         this.game.state.winner = {
-          winner: this.getWinner()[0],
+          winner: this.game.players[this.getWinner()[0]].username,
           points: this.getWinner()[1]
         }
     }      
@@ -151,7 +166,7 @@ export class EvensAndNones implements Game {
 type EANState = {
   round: number
   chart: Map<String, number>
-  number: number
+  infoRound: Map<String, {number: number, typeNumber: NumberType}>
 } & ({
   isGameOver: false
   winner: Record<string, never>

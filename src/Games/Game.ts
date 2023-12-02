@@ -13,6 +13,7 @@ type GameState<TGameState, TPlayerState> = {
   config: {
     timeout: number,
     maxPlayers: number
+    //TODO rondas
   },
   state: TGameState,
   players: Record<string, TPlayerState>
