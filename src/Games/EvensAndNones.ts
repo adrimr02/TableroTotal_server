@@ -67,7 +67,7 @@ export class EvensAndNones implements Game {
           chart: Object.entries(this.game.state.chart).map(x => {
             return {
               points: x[1],
-              playerId:  x[0],
+              playerId: x[0],
               username: this.game.players[x[0]].username
             }
           }).sort((x, y) => {
