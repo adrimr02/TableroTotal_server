@@ -94,7 +94,7 @@ export class RockPaperScissors {
   }
 
   startNextRound(): void {
-    // this.game.state.round++;
+    //this.game.state.round++;
 
     this.isGameOver();
     if (this.game.state.isGameOver) {
@@ -177,19 +177,19 @@ export class RockPaperScissors {
   
     // Determine the player with the most victories
     const winner = Object.keys(playerWins).reduce((prev, curr) =>
-      playerWins[curr] > playerWins[prev] ? curr : prev
+      playerWins[curr] > playerWins[prev] ? curr : prev, 'no_player'
     );
   
     // Create a new array with the moves of each round
     const moves: Record<string, string>[] = rounds.map((round) => {
       const moveRound: Record<string, string> = {};
       for (const player of players) {
-        moveRound[player] = round[player] || ''; 
+        moveRound[player] = round[player] || '';
       }
       return moveRound;
     });
   
-    if (this.game.state.round === this.game.config.rounds){
+    if (this.game.state.round === this.game.config.rounds) {
       this.game.state.isGameOver = true;
       this.game.state.results = {
         type: 'winner',
