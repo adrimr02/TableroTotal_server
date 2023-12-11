@@ -52,7 +52,8 @@ class Room {
         this.game = new RockPaperScissors({
           finishGame: this.finishGame.bind(this),
           showCountdown: this.showCountdown.bind(this),
-          showResults: this.showResults.bind(this)
+          showResults: this.showResults.bind(this),
+          showInitialInfo: this.showInitialInfo.bind(this)
         }, gameOptions.rounds)
         this.gameOptions.maxPlayers = RockPaperScissors.MaxPlayers
         break

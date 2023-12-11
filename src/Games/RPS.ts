@@ -8,6 +8,7 @@ type ControlFunctions = {
   ) => NodeJS.Timeout;
   finishGame: (results: unknown) => void;
   showResults: (results: unknown) => void;
+  showInitialInfo: (info: unknown) => void;
 };
 
 type RPSResults =
@@ -62,16 +63,23 @@ export class RockPaperScissors {
   private showCountdown: ControlFunctions['showCountdown'];
   private finishGame: ControlFunctions['finishGame'];
   private showResults: ControlFunctions['showResults'];
+  private showInitialInfo: ControlFunctions['showInitialInfo'];
 
   constructor(controlFn: ControlFunctions, rounds: number) {
     this.finishGame = controlFn.finishGame;
     this.showCountdown = controlFn.showCountdown;
     this.showResults = controlFn.showResults;
+    this.showInitialInfo = controlFn.showInitialInfo;
     this.game.config.rounds = rounds;
   }
 
   startGameLoop(): void {
     this.game.state.moveAllowed = true;
+
+    this.showInitialInfo({
+      players: Object.values(this.game.players).map((p, i) => ({ ...p, id: Object.keys(this.game.players)[i], points: 0 })),
+      round: 0
+    })
 
     this.showCountdown(
       this.game.config.timeout,
