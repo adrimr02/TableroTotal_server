@@ -13,18 +13,14 @@ export function initSocketServer(httpServer: HttpServer) {
   const roomManager = new RoomManager(gameIo)
 
   gameIo.on('connection', (socket) => {
-    console.log('a user connected')
     userManager.addPlayer(socket.id)
     socket.on('create', (username, options, callback) => {
-      console.log('create', username, options)
       socket.data.username = username
       
       let roomCode = genRoomCode()
       while (gameIo.adapter.rooms.get(roomCode)) {
         roomCode = genRoomCode()
       }
-
-      console.log(roomCode)
 
       if (!userManager.playerJoins(socket.id, roomCode)) {
         return // User already in a room
@@ -54,7 +50,6 @@ export function initSocketServer(httpServer: HttpServer) {
       })
     })
     socket.on('join', (username, code, callback) => {
-      console.log('join', code, username)
       socket.data.username = username
       const room = roomManager.getRoom(code.toUpperCase())
       if (!room) {
@@ -81,7 +76,6 @@ export function initSocketServer(httpServer: HttpServer) {
       })
     })
     socket.on('disconnect', () => {
-      console.log('user disconnected')
       userManager.removePlayer(socket.id)
     })
   })
