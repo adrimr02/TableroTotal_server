@@ -1,4 +1,4 @@
-import { type Game, TicTacToe, RockPaperScissors } from '../Games/Game'
+import { type Game, TicTacToe, RockPaperScissors, EvensAndNones } from '../Games/Game'
 import type { GameNamespace, GameSocket, GameOptions, ReadyState, PlayerInfo } from './types'
 import userManager from './userManager'
 
@@ -58,7 +58,13 @@ class Room {
         break
 
       case 'even_odd':
-        throw new Error(`Game ${this.gameOptions.game} not yet implemented`)
+       this.game = new EvensAndNones({
+          finishGame: this.finishGame.bind(this),
+          showCountdown: this.showCountdown.bind(this),
+          showResults: this.showResults.bind(this),
+          showInitialInfo: this.showInitialInfo.bind(this)
+      })
+       break
 
       case 'tic_tac_toe':
         this.game = new TicTacToe({

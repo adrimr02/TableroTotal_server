@@ -1,11 +1,11 @@
-import { number, string, z } from 'zod'
+import {z} from 'zod'
 import type { Game, GameState } from "./Game"
 import type { PlayerInfo } from '../sockets/types'
 
 type ControlFuntions = {
   showCountdown: (timeout: number, callback: () => void, isDone?: (counter: number) => boolean) => NodeJS.Timeout
   finishGame: (results: unknown) => void
-  round: (round: number) => void
+  //round: (round: number) => void
   showResults: (results: unknown) => void
   showInitialInfo: (info: unknown) => void
 }
@@ -21,7 +21,7 @@ export class EvensAndNones implements Game {
   private game: GameState<EANState, PlayerState> = {
     config: {
       timeout: 30,
-      maxPlayers: 10
+      maxPlayers: 10,
     },
     state: {
       round: 1,
@@ -35,14 +35,12 @@ export class EvensAndNones implements Game {
 
   private showCountdown: ControlFuntions['showCountdown']
   private finishGame: ControlFuntions['finishGame']
-  private getRound: ControlFuntions['round']
   private showResults: ControlFuntions['showResults']
   private showInitialInfo: ControlFuntions['showInitialInfo']
 
   constructor(controlFn: ControlFuntions) {
     this.finishGame = controlFn.finishGame
     this.showCountdown = controlFn.showCountdown
-    this.getRound = controlFn.round
     this.showResults = controlFn.showResults
     this.showInitialInfo = controlFn.showInitialInfo
   }
@@ -58,13 +56,16 @@ export class EvensAndNones implements Game {
     }
 
     this.showCountdown(this.game.config.timeout,
-
       () => {
+        console.log(this.game.state.infoRound)
+
         this.calculatePoints()
+
+        console.log(this.game.state.chart)
 
         this.showResults({
           round: round+1,
-          chart: Object.entries(this.game.state.chart).map(x => {
+          chart: Array.from(this.game.state.chart.entries()).map(x => {
             return {
               points: x[1],
               playerId: x[0],
@@ -88,7 +89,7 @@ export class EvensAndNones implements Game {
       },
 
       () => {
-        return Object.keys (this.game.state.infoRound).length == Object.keys(this.game.players).length
+        return Array.from(this.game.state.infoRound.keys()).length == Object.keys(this.game.players).length
       })    
   }
 
@@ -96,22 +97,26 @@ export class EvensAndNones implements Game {
     var sum = 0;
     var value;
 
-    for(var values of Object.values(this.game.state.infoRound)){
+    for(var values of this.game.state.infoRound.values()){
       sum += values.number
     }
 
-    for(var entries of Object.entries(this.game.state.infoRound)){
+    console.log(sum)
+
+    for(var entrie of this.game.state.infoRound.entries()){
       if(sum%2 == 0){
-        if(entries[1].numberType == 'evens'){
+        if(entrie[1].typeNumber == 'evens'){
           //this.game.state.chart[entries[0]] += EvensAndNones.PointsPerWin;
-          value = this.game.state.chart.get(entries[0]) || 0
-          this.game.state.chart.set(entries[0], value + EvensAndNones.PointsPerWin);
+          value = this.game.state.chart.get(entrie[0]) || 0
+          this.game.state.chart.set(entrie[0], value + EvensAndNones.PointsPerWin);
+          console.log("Acierto")
         }        
       } else {
-        if(entries[1].numberType == 'nones'){
+        if(entrie[1].typeNumber == 'nones'){
           //this.game.state.chart[entries[0]] += EvensAndNones.PointsPerWin;
-          value = this.game.state.chart.get(entries[0]) || 0
-          this.game.state.chart.set(entries[0], value + EvensAndNones.PointsPerWin);
+          value = this.game.state.chart.get(entrie[0]) || 0
+          this.game.state.chart.set(entrie[0], value + EvensAndNones.PointsPerWin);
+          console.log("Acierto")
         }
       }
     }
@@ -135,6 +140,7 @@ export class EvensAndNones implements Game {
   }
 
   move(playerId: string, action: unknown): void {
+    //TODO TRY CATCH
     var obj = moveActionParser.parse(action)
     this.game.state.infoRound.set(playerId, {number: obj.number, typeNumber: obj.numberType})
   }

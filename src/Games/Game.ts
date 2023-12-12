@@ -1,6 +1,7 @@
 import type { PlayerInfo } from "../sockets/types"
 import { TicTacToe } from "./TicTacToeGame"
 import {RockPaperScissors} from "./RPS"
+import { EvensAndNones } from "./EvensAndNones"
 
 interface Game {
   /**
@@ -47,5 +48,6 @@ export {
   Game,
   GameState,
   TicTacToe,
-  RockPaperScissors
+  RockPaperScissors,
+  EvensAndNones
 }
