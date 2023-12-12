@@ -72,7 +72,7 @@ export class EvensAndNones implements Game {
               username: this.game.players[x[0]].username
             }
           }).sort((x, y) => {
-            return x.points - y.points
+            return y.points - x.points
           })
         })
 
