@@ -25,7 +25,7 @@ export class EvensAndNones implements Game {
     },
     state: {
       round: 1,
-      chart: new Map<String, number>(),
+      chart: new Map<string, number>(),
       infoRound: new Map(),
       isGameOver: false,
       winner: {}
@@ -94,6 +94,7 @@ export class EvensAndNones implements Game {
 
   calculatePoints(){
     var sum = 0;
+    var value;
 
     for(var values of Object.values(this.game.state.infoRound)){
       sum += values.number
@@ -102,11 +103,15 @@ export class EvensAndNones implements Game {
     for(var entries of Object.entries(this.game.state.infoRound)){
       if(sum%2 == 0){
         if(entries[1].numberType == 'evens'){
-          this.game.state.chart[entries[0]] += EvensAndNones.PointsPerWin;
+          //this.game.state.chart[entries[0]] += EvensAndNones.PointsPerWin;
+          value = this.game.state.chart.get(entries[0]) || 0
+          this.game.state.chart.set(entries[0], value + EvensAndNones.PointsPerWin);
         }        
       } else {
         if(entries[1].numberType == 'nones'){
-          this.game.state.chart[entries[0]] += EvensAndNones.PointsPerWin;
+          //this.game.state.chart[entries[0]] += EvensAndNones.PointsPerWin;
+          value = this.game.state.chart.get(entries[0]) || 0
+          this.game.state.chart.set(entries[0], value + EvensAndNones.PointsPerWin);
         }
       }
     }
@@ -120,7 +125,8 @@ export class EvensAndNones implements Game {
 
     this.game.players[playerInfo.id] = { ...playerInfo}
 
-    this.game.state.chart[playerInfo.id] = 0
+    //this.game.state.chart[playerInfo.id] = 0
+    this.game.state.chart.set(playerInfo.id, 0)
 
     return true
   }
@@ -147,7 +153,7 @@ export class EvensAndNones implements Game {
   } 
 
   getWinner(): [string, number] {
-    var winner
+    var winner = ""
     var points = 0
 
     for (let [clave, valor] of this.game.state.chart) {
@@ -165,8 +171,8 @@ export class EvensAndNones implements Game {
 
 type EANState = {
   round: number
-  chart: Map<String, number>
-  infoRound: Map<String, {number: number, typeNumber: NumberType}>
+  chart: Map<string, number>
+  infoRound: Map<string, {number: number, typeNumber: NumberType}>
 } & ({
   isGameOver: false
   winner: Record<string, never>
