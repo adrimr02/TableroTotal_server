@@ -278,7 +278,7 @@ export class RockPaperScissors {
       this.game.state.isGameOver = true;
       this.game.state.results = {
         type: 'winner',
-        winner: winner !== 'no_player' ? winner : 'draw',
+        winner: winner !== 'no_player' ? winner : '',
         moves: moves,
       };
     }
