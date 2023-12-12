@@ -99,7 +99,6 @@ export class TicTacToe implements Game {
   }
 
   playerLeave(playerId: string): void {
-    console.log('playerLeave')
     this.game.state.isGameOver = true
     this.game.state.results = {
       type: 'resignation',
@@ -131,10 +130,7 @@ export class TicTacToe implements Game {
         if (player !== playerId)
           this.game.state.nextTurn = player
       }
-      console.log(this.game.state.board)
-    } catch (error) {
-      console.log(error)
-    }
+    } catch (error) {}
   }
 
   isGameOver(): void {
