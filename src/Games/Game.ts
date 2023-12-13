@@ -38,7 +38,6 @@ type GameState<TGameState, TPlayerState> = {
   config: {
     timeout: number,
     maxPlayers: number
-    //TODO rondas
     rounds: number
   },
   state: TGameState,
