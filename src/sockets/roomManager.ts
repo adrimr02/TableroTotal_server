@@ -1,4 +1,4 @@
-import { type Game, TicTacToe, RockPaperScissors } from '../Games/Game'
+import { type Game, TicTacToe, RockPaperScissors, EvensAndNones } from '../Games/Game'
 import type { GameNamespace, GameSocket, GameOptions, ReadyState, PlayerInfo } from './types'
 import userManager from './userManager'
 
@@ -20,7 +20,6 @@ export class RoomManager {
       this.rooms[roomCode] = room
       return room
     } catch (e: unknown) {
-      console.error(e)
       return null
     }
   }
@@ -52,13 +51,20 @@ class Room {
         this.game = new RockPaperScissors({
           finishGame: this.finishGame.bind(this),
           showCountdown: this.showCountdown.bind(this),
-          showResults: this.showResults.bind(this)
+          showResults: this.showResults.bind(this),
+          showInitialInfo: this.showInitialInfo.bind(this)
         }, gameOptions.rounds)
         this.gameOptions.maxPlayers = RockPaperScissors.MaxPlayers
         break
 
       case 'even_odd':
-        throw new Error(`Game ${this.gameOptions.game} not yet implemented`)
+       this.game = new EvensAndNones({
+          finishGame: this.finishGame.bind(this),
+          showCountdown: this.showCountdown.bind(this),
+          showResults: this.showResults.bind(this),
+          showInitialInfo: this.showInitialInfo.bind(this)
+      }, gameOptions.rounds)
+       break
 
       case 'tic_tac_toe':
         this.game = new TicTacToe({
@@ -77,7 +83,6 @@ class Room {
 
   public init() {
     // Start waiting time
-    console.log('init')
     this.showCountdown(120, this.startGame.bind(this), () => {
       this.showPlayers()
       if (this.players.length === 0)
@@ -107,14 +112,11 @@ class Room {
     if (!this.game.addPlayer({ id: newPlayer.id, username: newPlayer.data.username }))
       return false
 
-    console.log('player join')
-
     newPlayer.on('disconnect', () => {
       newPlayer.leave(this.roomCode)
       userManager.playerLeaves(newPlayer.id, this.roomCode)
       this.players = this.players.filter((player) => player.id !== newPlayer.id)
       this.game.playerLeave(newPlayer.id)
-      console.log('player leave')
       if (this.players.length === 0) {
         this.io.adapter.rooms.delete(this.roomCode)
       } else {
@@ -137,7 +139,6 @@ class Room {
       if (this.waitingState[player.id] === 'ready') this.waitingState[player.id] = 'not_ready'
       else if (this.waitingState[player.id] === 'not_ready') this.waitingState[player.id] = 'ready'
       this.showPlayers()
-      console.log(player.data.username, this.waitingState[player.id])
       callback(this.waitingState[player.id])
     })
 
@@ -151,7 +152,6 @@ class Room {
   }
 
   private showCountdown(timeout: number, callback: () => void, isDone?: (counter: number) => boolean) {
-    console.log(`countdown of ${timeout} seconds`)
     let counter = timeout
     const countDownInterval = setInterval(() => {
       this.io.to(this.roomCode).emit('show_time', { counter })
@@ -165,9 +165,7 @@ class Room {
   }
 
   private startGame() {
-    console.log('starting game')
     if (this.players.length < 2) {
-      console.log('not enough players')
       this.io.to(this.roomCode).emit("error", { code: "not_enough_players" })
       this.closeRoom()
       return
@@ -175,7 +173,6 @@ class Room {
     this.io.to(this.roomCode).emit("start_game")
 
     const checkClients = () => {
-      console.log("Waiting for clients ready")
       if (Object.values(this.clientsReady).includes(false)) {
         setTimeout(() => checkClients(), 200)
       } else {
@@ -191,7 +188,6 @@ class Room {
   }
 
   private nextTurn(players: string[]) {
-    console.log('next turn')
     // Anounces the players that will have the turn on the next round
     const playersInfo: PlayerInfo[] = this.players.filter(s => players.some(p => s.id === p)).map(p => ({ id: p.id, username: p.data.username }))
     this.io.to(this.roomCode).emit('next_turn', { players: playersInfo })
