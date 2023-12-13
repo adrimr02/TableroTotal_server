@@ -87,7 +87,9 @@ export class RockPaperScissors {
     });
     console.log("Empieza el juego")
 
+    this.game.state.moves[this.game.state.round] = {};
     this.game.state.moveAllowed = true;
+    
     this.showCountdown(
       this.game.config.timeout,
       () => {
@@ -99,7 +101,7 @@ export class RockPaperScissors {
         
         this.startNextRound();
       },
-      () => Object.keys(this.game.state.moves).length === Object.keys(this.game.players).length
+      () => Object.keys(this.game.state.moves[this.game.state.round]).length === Object.keys(this.game.players).length
     );
   }
 
