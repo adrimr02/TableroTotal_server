@@ -100,22 +100,18 @@ export class EvensAndNones implements Game {
       sum += values.number
     }
 
-    console.log(sum)
-
     for(const entry of this.game.state.infoRound.entries()){
       if(sum%2 == 0){
         if(entry[1].typeNumber == 'evens'){
           //this.game.state.chart[entries[0]] += EvensAndNones.PointsPerWin;
           value = this.game.state.chart.get(entry[0]) || 0
           this.game.state.chart.set(entry[0], value + EvensAndNones.PointsPerWin);
-          console.log("Acierto")
         }        
       } else {
         if(entry[1].typeNumber == 'nones'){
           //this.game.state.chart[entries[0]] += EvensAndNones.PointsPerWin;
           value = this.game.state.chart.get(entry[0]) || 0
           this.game.state.chart.set(entry[0], value + EvensAndNones.PointsPerWin);
-          console.log("Acierto")
         }
       }
     }
@@ -165,8 +161,7 @@ export class EvensAndNones implements Game {
     let points = 0
 
     for (const [clave, valor] of this.game.state.chart) {
-      console.log(`Clave: ${clave}, Valor: ${valor}`);
-      if(valor > points){
+      if(valor > points) {
         winner = clave
         points = valor
       }
