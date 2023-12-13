@@ -250,11 +250,6 @@ export class RockPaperScissors {
         }
       }
 
-      // const winner = players.reduce((prev, curr) =>
-      //   this.game.players[curr].points > this.game.players[prev].points ? curr : prev,
-      //   'no_player'
-      // );
-
       const moves: Record<string, string>[] = rounds.map((round) => {
         const moveRound: Record<string, string> = {};
         players.forEach((player) => {
