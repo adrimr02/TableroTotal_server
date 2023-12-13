@@ -25,6 +25,7 @@ export class EvensAndNones implements Game {
     },
     state: {
       round: 1,
+      isMoveAllowed: false,
       chart: new Map<string, number>(),
       infoRound: new Map(),
       isGameOver: false,
@@ -56,14 +57,11 @@ export class EvensAndNones implements Game {
       this.showInitialInfo({round})
     }
 
+    this.game.state.isMoveAllowed = true
     this.showCountdown(this.game.config.timeout,
       () => {
-        console.log(this.game.state.infoRound)
-
+        this.game.state.isMoveAllowed = false
         this.calculatePoints()
-
-        console.log(this.game.state.chart)
-
         this.showResults({
           round: round+1,
           chart: Array.from(this.game.state.chart.entries()).map(x => {
@@ -141,9 +139,12 @@ export class EvensAndNones implements Game {
   }
 
   move(playerId: string, action: unknown): void {
+    if (!this.game.state.isMoveAllowed) return
     //TODO TRY CATCH
-    const obj = moveActionParser.parse(action)
-    this.game.state.infoRound.set(playerId, {number: obj.number, typeNumber: obj.numberType})
+    try {
+      const obj = moveActionParser.parse(action)
+      this.game.state.infoRound.set(playerId, {number: obj.number, typeNumber: obj.numberType})
+    } catch(e) {}
   }
 
   isGameOver(): void {
@@ -179,7 +180,8 @@ export class EvensAndNones implements Game {
 type EANState = {
   round: number
   chart: Map<string, number>
-  infoRound: Map<string, {number: number, typeNumber: NumberType}>
+  infoRound: Map<string, {number: number, typeNumber: NumberType}>,
+  isMoveAllowed: boolean
 } & ({
   isGameOver: false
   winner: Record<string, never>
