@@ -5,7 +5,6 @@ import type { PlayerInfo } from '../sockets/types'
 type ControlFuntions = {
   showCountdown: (timeout: number, callback: () => void, isDone?: (counter: number) => boolean) => NodeJS.Timeout
   finishGame: (results: unknown) => void
-  //round: (round: number) => void
   showResults: (results: unknown) => void
   showInitialInfo: (info: unknown) => void
 }
@@ -22,6 +21,7 @@ export class EvensAndNones implements Game {
     config: {
       timeout: 30,
       maxPlayers: 10,
+      rounds: EvensAndNones.MaxRound
     },
     state: {
       round: 1,
@@ -38,8 +38,9 @@ export class EvensAndNones implements Game {
   private showResults: ControlFuntions['showResults']
   private showInitialInfo: ControlFuntions['showInitialInfo']
 
-  constructor(controlFn: ControlFuntions) {
+  constructor(controlFn: ControlFuntions, rounds: number) {
     this.finishGame = controlFn.finishGame
+    this.game.config.rounds = rounds
     this.showCountdown = controlFn.showCountdown
     this.showResults = controlFn.showResults
     this.showInitialInfo = controlFn.showInitialInfo
@@ -94,28 +95,28 @@ export class EvensAndNones implements Game {
   }
 
   calculatePoints(){
-    var sum = 0;
-    var value;
+    let sum = 0;
+    let value;
 
-    for(var values of this.game.state.infoRound.values()){
+    for(const values of this.game.state.infoRound.values()){
       sum += values.number
     }
 
     console.log(sum)
 
-    for(var entrie of this.game.state.infoRound.entries()){
+    for(const entry of this.game.state.infoRound.entries()){
       if(sum%2 == 0){
-        if(entrie[1].typeNumber == 'evens'){
+        if(entry[1].typeNumber == 'evens'){
           //this.game.state.chart[entries[0]] += EvensAndNones.PointsPerWin;
-          value = this.game.state.chart.get(entrie[0]) || 0
-          this.game.state.chart.set(entrie[0], value + EvensAndNones.PointsPerWin);
+          value = this.game.state.chart.get(entry[0]) || 0
+          this.game.state.chart.set(entry[0], value + EvensAndNones.PointsPerWin);
           console.log("Acierto")
         }        
       } else {
-        if(entrie[1].typeNumber == 'nones'){
+        if(entry[1].typeNumber == 'nones'){
           //this.game.state.chart[entries[0]] += EvensAndNones.PointsPerWin;
-          value = this.game.state.chart.get(entrie[0]) || 0
-          this.game.state.chart.set(entrie[0], value + EvensAndNones.PointsPerWin);
+          value = this.game.state.chart.get(entry[0]) || 0
+          this.game.state.chart.set(entry[0], value + EvensAndNones.PointsPerWin);
           console.log("Acierto")
         }
       }
@@ -141,13 +142,13 @@ export class EvensAndNones implements Game {
 
   move(playerId: string, action: unknown): void {
     //TODO TRY CATCH
-    var obj = moveActionParser.parse(action)
+    const obj = moveActionParser.parse(action)
     this.game.state.infoRound.set(playerId, {number: obj.number, typeNumber: obj.numberType})
   }
 
   isGameOver(): void {
     //Si se han completado todas las rondas
-    if(this.game.state.round == EvensAndNones.MaxRound){
+    if(this.game.state.round == this.game.config.rounds){
       this.game.state.isGameOver = true
 
         //Dame el jugador con más puntos
@@ -159,10 +160,10 @@ export class EvensAndNones implements Game {
   } 
 
   getWinner(): [string, number] {
-    var winner = ""
-    var points = 0
+    let winner = ""
+    let points = 0
 
-    for (let [clave, valor] of this.game.state.chart) {
+    for (const [clave, valor] of this.game.state.chart) {
       console.log(`Clave: ${clave}, Valor: ${valor}`);
       if(valor > points){
         winner = clave

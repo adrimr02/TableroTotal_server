@@ -39,6 +39,7 @@ type GameState<TGameState, TPlayerState> = {
     timeout: number,
     maxPlayers: number
     //TODO rondas
+    rounds: number
   },
   state: TGameState,
   players: Record<string, TPlayerState>

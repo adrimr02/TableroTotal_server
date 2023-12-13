@@ -63,7 +63,7 @@ class Room {
           showCountdown: this.showCountdown.bind(this),
           showResults: this.showResults.bind(this),
           showInitialInfo: this.showInitialInfo.bind(this)
-      })
+      }, gameOptions.rounds)
        break
 
       case 'tic_tac_toe':

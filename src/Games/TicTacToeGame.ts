@@ -18,7 +18,8 @@ export class TicTacToe implements Game {
   private game: GameState<TTTState, PlayerState> = {
     config: {
       timeout: 10,
-      maxPlayers: 2
+      maxPlayers: 2,
+      rounds: 0
     },
     state: {
       round: 0,
