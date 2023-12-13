@@ -253,7 +253,7 @@ export class RockPaperScissors {
       const moves: Record<string, string>[] = rounds.map((round) => {
         const moveRound: Record<string, string> = {};
         players.forEach((player) => {
-          moveRound[player] = round[player] || '';
+          moveRound[player] = round[player] || ''
         });
         return moveRound;
       });
