@@ -77,8 +77,6 @@ export class RockPaperScissors {
   }
 
   startGameLoop(): void {
-    this.game.state.moveAllowed = true;
-
     this.showInitialInfo({
       players: Object.values(this.game.players).map((p, i) => ({
         ...p,
@@ -88,12 +86,13 @@ export class RockPaperScissors {
       round: 1,
     });
 
+
+    this.game.state.moveAllowed = true;
     this.showCountdown(
       this.game.config.timeout,
       () => {
         this.game.state.moveAllowed = false;
         this.checkRoundResults();
-        //this.showResults({ round: this.game.state.round});
         this.startNextRound();
       },
       () => Object.keys(this.game.state.moves).length === Object.keys(this.game.players).length
@@ -114,8 +113,8 @@ export class RockPaperScissors {
     this.showCountdown(
       this.game.config.timeout,
       () => {
-        console.log("Termino la ronda actual", this.game.state.round)
         this.game.state.moveAllowed = false;
+        console.log("Termino la ronda ", this.game.state.round)
         this.checkRoundResults();
 
         //this.showResults({ moves: this.game.state.moves });
