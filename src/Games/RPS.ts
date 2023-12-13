@@ -85,14 +85,18 @@ export class RockPaperScissors {
       })),
       round: 1,
     });
-
+    console.log("Empieza el juego")
 
     this.game.state.moveAllowed = true;
     this.showCountdown(
       this.game.config.timeout,
       () => {
         this.game.state.moveAllowed = false;
+        console.log("Termino la ronda ", this.game.state.round)
         this.checkRoundResults();
+
+        this.game.state.round++;
+        
         this.startNextRound();
       },
       () => Object.keys(this.game.state.moves).length === Object.keys(this.game.players).length
@@ -107,6 +111,8 @@ export class RockPaperScissors {
       return;
     }
 
+    console.log("Empieza la ronda " + this.game.state.round)
+
     this.game.state.moves[this.game.state.round] = {};
     this.game.state.moveAllowed = true;
 
@@ -117,11 +123,11 @@ export class RockPaperScissors {
         console.log("Termino la ronda ", this.game.state.round)
         this.checkRoundResults();
 
-        //this.showResults({ moves: this.game.state.moves });
-        //this.game.state.round++;
+        this.game.state.round++;
+
         this.startNextRound();
       },
-      () => Object.keys(this.game.state.moves).length === Object.keys(this.game.players).length
+      () => Object.keys(this.game.state.moves[this.game.state.round]).length === Object.keys(this.game.players).length
     );
   }
 
@@ -139,7 +145,6 @@ export class RockPaperScissors {
     if (Object.keys(this.game.players).length === this.game.config.maxPlayers) return false;
 
     if (!playerInfo.username) {
-      console.error(`El jugador (${playerInfo.id}) no tiene un nombre de usuario.`);
       return false;
     }
 
@@ -152,25 +157,27 @@ export class RockPaperScissors {
   move(playerId: string, action: unknown): void {
     if (!this.game.state.moveAllowed) return;
 
+    console.log(`El jugador ${playerId} eligio ${action} en la ronda ${this.game.state.round}`)
+    
     try {
       const move = moveActionParser.parse(action);
-
+      
       // Asegúrate de que this.game.state.moves[this.game.state.round] sea un array
       if (!this.game.state.moves[this.game.state.round]) {
         this.game.state.moves[this.game.state.round] = {};
       }
-
+      
       this.game.state.moves[this.game.state.round][playerId] = move;
     } catch (error) {
-      // Manejar el error de análisis si es necesario
-      console.error(`Error al parsear la acción del jugador (${playerId}):`, error);
+      // Manejar el error de parse si es necesario
+      console.log(error)
     }
   }
 
 
   checkRoundResults(): void {
     const currentRoundMoves = this.game.state.moves[this.game.state.round];
-    console.log(currentRoundMoves)
+    console.log("Movimientos de la ronda " + this.game.state.round + ": ", currentRoundMoves)
 
     if (
       currentRoundMoves // &&
@@ -190,32 +197,14 @@ export class RockPaperScissors {
         };
       });
 
-      // Asigna los puntos a cada jugador
-      /*
-      Object.keys(this.game.players).forEach((nombreJugador) => {
-        const jugador = this.game.players[nombreJugador];
-  
-        // Verifica si el jugador participó en la ronda actual
-        const puntosEnEstaRonda = currentRoundMoves[nombreJugador]
-          ? 1  // Asigna 1 punto si el jugador participó en la ronda
-          : 0; // No asigna puntos si el jugador no participó
-  
-        // Asigna los puntos al jugador
-        jugador.points += puntosEnEstaRonda;
-      });
-      */
-
       // Obtén los resultados actualizados por jugador
       const roundPoints: Record<string, number> = Object.fromEntries(
         resultadosPorJugador.map((result) => [result.id, result.puntos])
       );
       console.log("roundPoints", roundPoints)
-      console.log("Ronda actual", this.game.state.round)
 
       // Llama al método showResults con los resultados
       this.showResults({ round: this.game.state.round, points: roundPoints });
-
-      this.game.state.round++;
     }
   }
 
@@ -254,11 +243,8 @@ export class RockPaperScissors {
   isGameOver(): void {
     const rounds = this.game.state.moves;
 
-    if (rounds.length === 0) {
-      return; // No rounds played yet
-    }
-
-    if (this.game.state.round === this.game.config.rounds) {
+    if (this.game.state.round >= this.game.config.rounds) {
+      console.log('Ultima ronda terminada: ', this.game.state.round)
       const players = Object.keys(this.game.players);
       const playerWins: Record<string, number> = {};
 
