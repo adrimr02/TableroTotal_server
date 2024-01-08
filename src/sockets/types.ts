@@ -21,7 +21,7 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
   // General events
   create: (
-    username: string,
+    user : { userId: string, username: string },
     gameOptions: GameOptions,
     callback: (
       params: { status: 'ok'; roomCode: string; gameOptions: GameOptions } | { status: 'error'; errorMessage: string },
@@ -29,7 +29,7 @@ export interface ClientToServerEvents {
   ) => void
 
   join: (
-    username: string,
+    user : { userId: string, username: string },
     code: string,
     callback: (params: { status: 'ok'; gameOptions: GameOptions } | { status: 'error'; errorMessage: string }) => void,
   ) => void
@@ -42,6 +42,7 @@ export interface ClientToServerEvents {
 }
 
 export interface SocketData {
+  userId: string
   username: string
 }
 

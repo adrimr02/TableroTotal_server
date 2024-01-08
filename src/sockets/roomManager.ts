@@ -147,6 +147,7 @@ class Room {
   }
 
   private finishGame(results: unknown) {
+    
     this.io.to(this.roomCode).emit("finish_game", results)
   }
 }

@@ -13,9 +13,10 @@ export function initSocketServer(httpServer: HttpServer) {
 
   gameIo.on('connection', (socket) => {
     console.log('a user connected')
-    socket.on('create', (username, options, callback) => {
+    socket.on('create', ({ userId, username }, options, callback) => {
       console.log('create', username, options)
       socket.data.username = username
+      socket.data.userId = userId
 
       let roomCode = genRoomCode()
       while (gameIo.adapter.rooms.get(roomCode)) {
@@ -45,9 +46,10 @@ export function initSocketServer(httpServer: HttpServer) {
         gameOptions: room.gameOptions,
       })
     })
-    socket.on('join', (code, username, callback) => {
+    socket.on('join', ({ userId, username }, code, callback) => {
       console.log('join', code, username)
       socket.data.username = username
+      socket.data.userId = userId
 
       const room = roomManager.getRoom(code)
 
