@@ -11,7 +11,9 @@ export interface ServerToClientEvents {
   start_game: () => void
   
   // Game events
-  next_turn: (params: { players: string[] }) => void
+  show_initial_info: (params: unknown) => void
+
+  next_turn: (params: { players: PlayerInfo[] }) => void
   
   show_turn_results: (results : unknown) => void
 
@@ -37,6 +39,8 @@ export interface ClientToServerEvents {
   // Room events
   mark_as_ready: (callback: (newState: ReadyState) => void) => void
 
+  client_ready: () => void
+
   // Game events
   move: (action: unknown) => void
 }
@@ -54,6 +58,11 @@ type PlayerList = {
   username: string,
   readyState: ReadyState
 }[]
+
+export type PlayerInfo = {
+  id: string
+  username: string
+}
 
 export type GameNamespace = Namespace<ClientToServerEvents, ServerToClientEvents, Record<string, never>, SocketData>
 export type GameSocket = Socket<ClientToServerEvents, ServerToClientEvents, Record<string, never>, SocketData>
