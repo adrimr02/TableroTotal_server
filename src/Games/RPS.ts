@@ -85,7 +85,6 @@ export class RockPaperScissors {
       })),
       round: 1,
     });
-    console.log("Empieza el juego")
 
     this.game.state.moves[this.game.state.round] = {};
     this.game.state.moveAllowed = true;
@@ -94,7 +93,6 @@ export class RockPaperScissors {
       this.game.config.timeout,
       () => {
         this.game.state.moveAllowed = false;
-        console.log("Termino la ronda ", this.game.state.round)
         this.checkRoundResults();
 
         this.game.state.round++;
@@ -113,8 +111,6 @@ export class RockPaperScissors {
       return;
     }
 
-    console.log("Empieza la ronda " + this.game.state.round)
-
     this.game.state.moves[this.game.state.round] = {};
     this.game.state.moveAllowed = true;
 
@@ -122,7 +118,6 @@ export class RockPaperScissors {
       this.game.config.timeout,
       () => {
         this.game.state.moveAllowed = false;
-        console.log("Termino la ronda ", this.game.state.round)
         this.checkRoundResults();
 
         this.game.state.round++;
@@ -158,8 +153,6 @@ export class RockPaperScissors {
 
   move(playerId: string, action: unknown): void {
     if (!this.game.state.moveAllowed) return;
-
-    console.log(`El jugador ${playerId} eligio ${action} en la ronda ${this.game.state.round}`)
     
     try {
       const move = moveActionParser.parse(action);
@@ -172,14 +165,12 @@ export class RockPaperScissors {
       this.game.state.moves[this.game.state.round][playerId] = move;
     } catch (error) {
       // Manejar el error de parse si es necesario
-      console.log(error)
     }
   }
 
 
   checkRoundResults(): void {
     const currentRoundMoves = this.game.state.moves[this.game.state.round];
-    console.log("Movimientos de la ronda " + this.game.state.round + ": ", currentRoundMoves)
 
     if (
       currentRoundMoves // &&
@@ -203,7 +194,6 @@ export class RockPaperScissors {
       const roundPoints: Record<string, number> = Object.fromEntries(
         resultadosPorJugador.map((result) => [result.id, result.puntos])
       );
-      console.log("roundPoints", roundPoints)
 
       // Llama al método showResults con los resultados
       this.showResults({ round: this.game.state.round, points: roundPoints });
@@ -246,26 +236,31 @@ export class RockPaperScissors {
     const rounds = this.game.state.moves;
 
     if (this.game.state.round >= this.game.config.rounds) {
-      console.log('Ultima ronda terminada: ', this.game.state.round)
-      const players = Object.keys(this.game.players);
-      const playerWins: Record<string, number> = {};
-
-      const winner = Object.keys(playerWins).reduce((prev, curr) =>
-        playerWins[curr] > playerWins[prev] ? curr : prev,
-        'no_player'
-      );
+      const players = Object.keys(this.game.players)
+      let winner = undefined
+      for (const player of Object.values(this.game.players)) {
+        if (!winner) {
+          winner = player.id
+        } else {
+          if (player.points > this.game.players[winner].points) {
+            winner = player.id
+          } else if (player.points === this.game.players[winner].points) {
+            winner = 'no_player'
+          }
+        }
+      }
 
       const moves: Record<string, string>[] = rounds.map((round) => {
         const moveRound: Record<string, string> = {};
         players.forEach((player) => {
-          moveRound[player] = round[player] || '';
+          moveRound[player] = round[player] || ''
         });
         return moveRound;
       });
       this.game.state.isGameOver = true;
       this.game.state.results = {
         type: 'winner',
-        winner: winner !== 'no_player' ? winner : '',
+        winner: winner!,
         moves: moves,
       };
     }

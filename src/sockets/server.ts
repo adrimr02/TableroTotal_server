@@ -8,7 +8,6 @@ import userManager from './userManager'
 export function initSocketServer(httpServer: HttpServer) {
   const io = new Server<ClientToServerEvents, ServerToClientEvents, Record<string, never>, SocketData>(httpServer)
   const gameIo = io.of('/play')
-  // const friendsIo = io.of('/friends')
 
   const roomManager = new RoomManager(gameIo)
 
