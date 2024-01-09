@@ -99,6 +99,11 @@ class Room {
     if (this.players.length == this.gameOptions.maxPlayers) {
       return false
     }
+
+    // Prevents the same user from joining twice from different devices
+    if (this.players.some(player => player.data.userId === newPlayer.data.userId)) {
+      return false
+    }
     
     userManager.playerJoins(newPlayer.id, this.roomCode)
     
