@@ -8,7 +8,7 @@ initializeApp({
   credential: cert(serviceAccount as ServiceAccount)
 });
 
-const db = getFirestore();
+const db = getFirestore()
 
 export function addGameRecord(userId: string, results: GameRecord) {
   db.collection('users').doc(userId).collection('games').add(results)

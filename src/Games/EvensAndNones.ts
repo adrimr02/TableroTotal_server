@@ -176,6 +176,7 @@ export class EvensAndNones implements Game {
       date: new Date(),
       players: Object.keys(this.game.players).map(id => ({
         username: this.game.players[id].username,
+        authId: this.game.players[id].authId,
         points: this.game.state.chart.get(id) || 0
       }))
     }
@@ -203,6 +204,7 @@ type GameResults = {
 
 type PlayerState = {
   username: string
+  authId: string
 }
 
 type NumberType = 'evens' | 'nones'

@@ -173,6 +173,7 @@ export class TicTacToe implements Game {
       date: new Date(),
       players: Object.values(this.game.players).map(p => ({
         username: p.username,
+        authId: p.authId,
         points: this.game.state.results.type === 'draw' ? 0 : (this.game.state.results.winner === p.id ? 1 : 0)
       })),
     }
@@ -209,6 +210,7 @@ type PlayerState = {
   symbol: BoardSymbol,
   username: string,
   id: string
+  authId: string
 }
 
 type BoardSymbol = 'circle' | 'cross'

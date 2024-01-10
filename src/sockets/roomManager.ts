@@ -115,7 +115,7 @@ class Room {
     this.initListeners(newPlayer)
     this.showPlayers()
     
-    if (!this.game.addPlayer({ id: newPlayer.id, username: newPlayer.data.username }))
+    if (!this.game.addPlayer({ id: newPlayer.id, username: newPlayer.data.username, authId: newPlayer.data.userId }))
       return false
 
     newPlayer.on('disconnect', () => {
@@ -195,7 +195,7 @@ class Room {
 
   private nextTurn(players: string[]) {
     // Anounces the players that will have the turn on the next round
-    const playersInfo: PlayerInfo[] = this.players.filter(s => players.some(p => s.id === p)).map(p => ({ id: p.id, username: p.data.username }))
+    const playersInfo: PlayerInfo[] = this.players.filter(s => players.some(p => s.id === p)).map(p => ({ id: p.id, username: p.data.username, authId: p.data.userId }))
     this.io.to(this.roomCode).emit('next_turn', { players: playersInfo })
   }
 
@@ -205,6 +205,7 @@ class Room {
 
   private finishGame(results: unknown) {
     const record = this.game.getResults()
+    record.players = record.players.sort((x, y) => y.points - x.points)
     for (const player of this.players) {
       userManager.playerLeaves(player.id, this.roomCode)
 

@@ -61,6 +61,7 @@ type PlayerList = {
 
 export type PlayerInfo = {
   id: string
+  authId: string
   username: string
 }
 
@@ -81,6 +82,7 @@ export type GameRecord = {
   date: Date
   players: {
     username: string
+    authId: string
     points: number
   }[]
 }
