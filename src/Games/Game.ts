@@ -1,4 +1,4 @@
-import type { PlayerInfo } from "../sockets/types"
+import type { GameRecord, PlayerInfo } from "../sockets/types"
 import { TicTacToe } from "./TicTacToeGame"
 import {RockPaperScissors} from "./RPS"
 import { EvensAndNones } from "./EvensAndNones"
@@ -32,6 +32,8 @@ interface Game {
    * @param action Information about the movement made. Each game can have its own
    */
   move(playerId: string, action: unknown): void
+
+  getResults(): GameRecord
 }
 
 type GameState<TGameState, TPlayerState> = {

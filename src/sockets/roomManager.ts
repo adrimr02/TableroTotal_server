@@ -1,4 +1,5 @@
 import { type Game, TicTacToe, RockPaperScissors, EvensAndNones } from '../Games/Game'
+import { addGameRecord } from '../firebase'
 import type { GameNamespace, GameSocket, GameOptions, ReadyState, PlayerInfo } from './types'
 import userManager from './userManager'
 
@@ -203,9 +204,12 @@ class Room {
   }
 
   private finishGame(results: unknown) {
+    const record = this.game.getResults()
     for (const player of this.players) {
       userManager.playerLeaves(player.id, this.roomCode)
+
       // TODO save result in firebase
+      addGameRecord(player.data.userId, record)
     }
     this.io.to(this.roomCode).emit("finish_game", results)
     this.closeRoom()

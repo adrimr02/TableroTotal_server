@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import type { Game, GameState } from "./Game"
-import type { PlayerInfo } from '../sockets/types'
+import type { GameRecord, PlayerInfo } from '../sockets/types'
 
 type ControlFuntions = {
   showCountdown: (timeout: number, callback: () => void, isDone?: (counter: number) => boolean) => NodeJS.Timeout
@@ -166,6 +166,17 @@ export class TicTacToe implements Game {
     // The game is not over
     return
   }
+
+  getResults(): GameRecord {
+    return {
+      game: 'tic_tac_toe',
+      date: new Date(),
+      players: Object.values(this.game.players).map(p => ({
+        username: p.username,
+        points: this.game.state.results.type === 'draw' ? 0 : (this.game.state.results.winner === p.id ? 1 : 0)
+      })),
+    }
+  }
   
 }
 
@@ -197,6 +208,7 @@ type BoardCell = null|string
 type PlayerState = {
   symbol: BoardSymbol,
   username: string,
+  id: string
 }
 
 type BoardSymbol = 'circle' | 'cross'

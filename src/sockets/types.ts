@@ -52,7 +52,7 @@ export interface SocketData {
 
 const games = ['rock_paper_scissors', 'tic_tac_toe', 'even_odd'] as const
 
-type Game = (typeof games)[number]
+export type Game = (typeof games)[number]
 
 type PlayerList = {
   username: string,
@@ -75,3 +75,12 @@ export type GameOptions = {
 }
 
 export type ReadyState = 'ready' | 'not_ready'
+
+export type GameRecord = {
+  game: Game
+  date: Date
+  players: {
+    username: string
+    points: number
+  }[]
+}
