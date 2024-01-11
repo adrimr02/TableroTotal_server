@@ -125,6 +125,7 @@ class Room {
       this.game.playerLeave(newPlayer.id)
       if (this.players.length === 0) {
         this.io.adapter.rooms.delete(this.roomCode)
+        this.closeRoom()
       } else {
         this.showPlayers()
       }
