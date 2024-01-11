@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { GameRecord } from '../sockets/types';
 
 type ControlFunctions = {
   showCountdown: (
@@ -26,9 +27,10 @@ type RPSState = {
 };
 
 type PlayerInfo = {
-  id: string;
-  username: string;
-  points: number;
+  id: string
+  authId: string
+  username: string
+  points: number
 };
 
 type PlayerState = PlayerInfo;
@@ -271,6 +273,18 @@ export class RockPaperScissors {
       if (player !== otherPlayer) return otherPlayer;
     }
     return 'no_player';
+  }
+
+  getResults(): GameRecord {
+    return {
+      game: 'rock_paper_scissors',
+      date: new Date(),
+      players: Object.values(this.game.players).map((p) => ({
+        username: p.username,
+        authId: p.authId,
+        points: p.points,
+      })),
+    };
   }
 }
 

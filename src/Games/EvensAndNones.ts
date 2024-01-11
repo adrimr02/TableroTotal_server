@@ -1,6 +1,6 @@
 import {z} from 'zod'
 import type { Game, GameState } from "./Game"
-import type { PlayerInfo } from '../sockets/types'
+import type { GameRecord, PlayerInfo } from '../sockets/types'
 
 type ControlFuntions = {
   showCountdown: (timeout: number, callback: () => void, isDone?: (counter: number) => boolean) => NodeJS.Timeout
@@ -12,7 +12,7 @@ type ControlFuntions = {
 const moveActionParser = z.object({ numberType: z.union([z.literal('evens'), z.literal('nones')]), number: z.number().int() })
 
 export class EvensAndNones implements Game {
-  public static MaxPlayers = 10
+  public static MaxPlayers = 8
   public static MaxRound = 10
   public static PointsPerWin = 3
 
@@ -170,6 +170,18 @@ export class EvensAndNones implements Game {
     return [winner, points]
   }
 
+  getResults(): GameRecord {
+    return {
+      game: 'even_odd',
+      date: new Date(),
+      players: Object.keys(this.game.players).map(id => ({
+        username: this.game.players[id].username,
+        authId: this.game.players[id].authId,
+        points: this.game.state.chart.get(id) || 0
+      }))
+    }
+  }
+
 }
 
 type EANState = {
@@ -192,6 +204,7 @@ type GameResults = {
 
 type PlayerState = {
   username: string
+  authId: string
 }
 
 type NumberType = 'evens' | 'nones'

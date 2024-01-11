@@ -1,4 +1,5 @@
 import { type Game, TicTacToe, RockPaperScissors, EvensAndNones } from '../Games/Game'
+import { addGameRecord } from '../firebase'
 import type { GameNamespace, GameSocket, GameOptions, ReadyState, PlayerInfo } from './types'
 import userManager from './userManager'
 
@@ -99,6 +100,11 @@ class Room {
     if (this.players.length == this.gameOptions.maxPlayers) {
       return false
     }
+
+    // Prevents the same user from joining twice from different devices
+    if (this.players.some(player => player.data.userId === newPlayer.data.userId)) {
+      return false
+    }
     
     userManager.playerJoins(newPlayer.id, this.roomCode)
     
@@ -109,7 +115,7 @@ class Room {
     this.initListeners(newPlayer)
     this.showPlayers()
     
-    if (!this.game.addPlayer({ id: newPlayer.id, username: newPlayer.data.username }))
+    if (!this.game.addPlayer({ id: newPlayer.id, username: newPlayer.data.username, authId: newPlayer.data.userId }))
       return false
 
     newPlayer.on('disconnect', () => {
@@ -119,6 +125,7 @@ class Room {
       this.game.playerLeave(newPlayer.id)
       if (this.players.length === 0) {
         this.io.adapter.rooms.delete(this.roomCode)
+        this.closeRoom()
       } else {
         this.showPlayers()
       }
@@ -189,7 +196,7 @@ class Room {
 
   private nextTurn(players: string[]) {
     // Anounces the players that will have the turn on the next round
-    const playersInfo: PlayerInfo[] = this.players.filter(s => players.some(p => s.id === p)).map(p => ({ id: p.id, username: p.data.username }))
+    const playersInfo: PlayerInfo[] = this.players.filter(s => players.some(p => s.id === p)).map(p => ({ id: p.id, username: p.data.username, authId: p.data.userId }))
     this.io.to(this.roomCode).emit('next_turn', { players: playersInfo })
   }
 
@@ -198,8 +205,14 @@ class Room {
   }
 
   private finishGame(results: unknown) {
-    for (const player of this.players)
+    const record = this.game.getResults()
+    record.players = record.players.sort((x, y) => y.points - x.points)
+    for (const player of this.players) {
       userManager.playerLeaves(player.id, this.roomCode)
+
+      // TODO save result in firebase
+      addGameRecord(player.data.userId, record)
+    }
     this.io.to(this.roomCode).emit("finish_game", results)
     this.closeRoom()
   }

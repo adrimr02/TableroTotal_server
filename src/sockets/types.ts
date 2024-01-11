@@ -23,7 +23,7 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
   // General events
   create: (
-    username: string,
+    user : { userId: string, username: string },
     gameOptions: GameOptions,
     callback: (
       params: { status: 'ok'; roomCode: string; gameOptions: GameOptions } | { status: 'error'; errorMessage: string },
@@ -31,7 +31,7 @@ export interface ClientToServerEvents {
   ) => void
 
   join: (
-    username: string,
+    user : { userId: string, username: string },
     code: string,
     callback: (params: { status: 'ok'; gameOptions: GameOptions } | { status: 'error'; errorMessage: string }) => void,
   ) => void
@@ -46,12 +46,13 @@ export interface ClientToServerEvents {
 }
 
 export interface SocketData {
+  userId: string
   username: string
 }
 
 const games = ['rock_paper_scissors', 'tic_tac_toe', 'even_odd'] as const
 
-type Game = (typeof games)[number]
+export type Game = (typeof games)[number]
 
 type PlayerList = {
   username: string,
@@ -60,6 +61,7 @@ type PlayerList = {
 
 export type PlayerInfo = {
   id: string
+  authId: string
   username: string
 }
 
@@ -74,3 +76,13 @@ export type GameOptions = {
 }
 
 export type ReadyState = 'ready' | 'not_ready'
+
+export type GameRecord = {
+  game: Game
+  date: Date
+  players: {
+    username: string
+    authId: string
+    points: number
+  }[]
+}

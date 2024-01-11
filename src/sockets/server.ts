@@ -13,9 +13,10 @@ export function initSocketServer(httpServer: HttpServer) {
 
   gameIo.on('connection', (socket) => {
     userManager.addPlayer(socket.id)
-    socket.on('create', (username, options, callback) => {
+    socket.on('create', ({ userId, username }, options, callback) => {
       socket.data.username = username
-      
+      socket.data.userId = userId
+
       let roomCode = genRoomCode()
       while (gameIo.adapter.rooms.get(roomCode)) {
         roomCode = genRoomCode()
@@ -48,8 +49,10 @@ export function initSocketServer(httpServer: HttpServer) {
         gameOptions: room.gameOptions,
       })
     })
-    socket.on('join', (username, code, callback) => {
+    
+    socket.on('join', ({ userId, username }, code, callback) => {
       socket.data.username = username
+      socket.data.userId = userId
       const room = roomManager.getRoom(code.toUpperCase())
       if (!room) {
         return callback({
