@@ -155,8 +155,8 @@ export class EvensAndNones implements Game {
     }      
   }
 
-  getWinnerNames(winners:string[]){
-    let names = []
+  getWinnerNames(winners:string[]) {
+    const names: string[] = []
     for(const winner of winners){
         names.push(this.game.players[winner].username)
     }
@@ -164,7 +164,7 @@ export class EvensAndNones implements Game {
   }
 
   getWinner(): [string[], number] {
-    let winner = []
+    const winner: string[] = []
     let points = 0
 
     for (const entrada of this.game.state.chart) {
