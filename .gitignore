@@ -129,4 +129,4 @@ dist
 .yarn/install-state.gz
 .pnp.*
 tablerototal-firebase-adminsdk-9c2wp-b76c7b96c6.json
-.vscode/settings.json
+.vscode/*
