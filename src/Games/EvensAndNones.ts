@@ -136,7 +136,6 @@ export class EvensAndNones implements Game {
 
   move(playerId: string, action: unknown): void {
     if (!this.game.state.isMoveAllowed) return
-    //TODO TRY CATCH
     try {
       const obj = moveActionParser.parse(action)
       this.game.state.infoRound.set(playerId, {number: obj.number, typeNumber: obj.numberType})
@@ -150,20 +149,33 @@ export class EvensAndNones implements Game {
 
         //Dame el jugador con más puntos
         this.game.state.winner = {
-          winner: this.game.players[this.getWinner()[0]].username,
+          winner: this.getWinnerNames(this.getWinner()[0]),
           points: this.getWinner()[1]
         }
     }      
-  } 
+  }
 
-  getWinner(): [string, number] {
-    let winner = ""
+  getWinnerNames(winners:string[]) {
+    const names: string[] = []
+    for(const winner of winners){
+        names.push(this.game.players[winner].username)
+    }
+    return names
+  }
+
+  getWinner(): [string[], number] {
+    const winner: string[] = []
     let points = 0
 
-    for (const [clave, valor] of this.game.state.chart) {
-      if(valor > points) {
-        winner = clave
-        points = valor
+    for (const entrada of this.game.state.chart) {
+      if(entrada[1] > points) {
+        points = entrada[1]
+      }
+    }
+
+    for(const [clave, valor] of this.game.state.chart){
+      if(valor === points) {
+        winner.push(clave)
       }
     }
 
@@ -198,7 +210,7 @@ type EANState = {
 })
 
 type GameResults = {
-  winner: string
+  winner: string[]
   points: number
 }
 

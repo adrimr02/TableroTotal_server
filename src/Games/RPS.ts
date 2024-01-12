@@ -132,6 +132,8 @@ export class RockPaperScissors {
 
 
   playerLeave(playerId: string): void {
+    if (this.game.state.isGameOver) return
+
     this.game.state.isGameOver = true;
     this.game.state.results = {
       type: 'resignation',
