@@ -11,6 +11,10 @@ app.get('/', (_req, res) => {
   res.send('Hello World!')
 })
 
+app.get('/health', (_req, res) => {
+  res.status(200).json({ status: 'ok' })
+})
+
 initSocketServer(httpServer)
 
 httpServer.listen(app.get('port'), () => {
